@@ -488,7 +488,7 @@ ifeq ($(TARGET_LINUX),1)
 endif
 ifeq ($(TARGET_SDL2),1)
   PLATFORM_CFLAGS  := -DTARGET_SDL2
-  PLATFORM_LDFLAGS := -lm -lpthread -lasound -no-pie
+  PLATFORM_LDFLAGS := -lm -lpthread -no-pie
 endif
 ifeq ($(TARGET_WEB),1)
   PLATFORM_CFLAGS  := -DTARGET_WEB
