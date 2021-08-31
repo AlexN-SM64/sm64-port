@@ -12,7 +12,7 @@
 #include "controller_sdl.h"
 #endif
 
-#if defined __linux__ && !defined(TARGET_SDL2)
+#if defined (__linux__) && !defined(TARGET_SDL2)
 #include "controller_wup.h"
 #endif
 
@@ -23,7 +23,7 @@ static struct ControllerAPI *controller_implementations[] = {
 #else
     &controller_sdl,
 #endif
-#if defined __linux__ && !defined(TARGET_SDL2) 
+#if defined (__linux__) && !defined(TARGET_SDL2) 
     &controller_wup,
 #endif
     &controller_keyboard,
