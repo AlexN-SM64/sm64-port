@@ -487,8 +487,8 @@ ifeq ($(TARGET_LINUX),1)
   PLATFORM_LDFLAGS := -lm -lpthread `pkg-config --libs libusb-1.0` -lasound -lpulse -no-pie
 endif
 ifeq ($(TARGET_SDL2),1)
-  PLATFORM_CFLAGS  := -DTARGET_SDL2
-  PLATFORM_LDFLAGS := -lm -lpthread -no-pie
+  PLATFORM_CFLAGS  := -DTARGET_SDL2 `sdl2-config --cflags`
+  PLATFORM_LDFLAGS := -lm -lpthread -no-pie `sdl2-config --libs`
 endif
 ifeq ($(TARGET_WEB),1)
   PLATFORM_CFLAGS  := -DTARGET_WEB
