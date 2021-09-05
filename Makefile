@@ -511,16 +511,16 @@ ifeq ($(ENABLE_OPENGL),1)
   endif
   ifeq ($(TARGET_SDL2),1)
     GFX_CFLAGS  += -DUSE_SDL=2
-    ifndef _WIN32
-      # On most OSes, SDL2 can use either GL or GLES2
+    ifeq ($(OS),Windows_NT)
+        # On Windows, simply use OpenGL
+        GFX_LDFLAGS += $(shell sdl2-config --libs) -lopengl32
+    else
+      # On other OSes, SDL2 can use either GL or GLES2
       ifeq ($(USE_GLES),1)
         GFX_LDFLAGS += -lGLESv2 -lSDL2 -DUSE_GLES
       else
         GFX_LDFLAGS += -lGL -lSDL2
       endif
-    else
-        # On Windows, simply use OpenGL
-        GFX_LDFLAGS += $(shell sdl2-config --libs) -lopengl32
     endif
   endif
   ifeq ($(TARGET_WEB),1)
