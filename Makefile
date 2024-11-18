@@ -394,14 +394,20 @@ DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 ifeq ($(TARGET_N64),1)
 
 # detect prefix for MIPS toolchain
+ifeq ($(MIPS_CROSS),)
 ifneq      ($(call find-command,mips-linux-gnu-ld),)
   CROSS := mips-linux-gnu-
 else ifneq ($(call find-command,mips64-linux-gnu-ld),)
   CROSS := mips64-linux-gnu-
 else ifneq ($(call find-command,mips64-elf-ld),)
   CROSS := mips64-elf-
+else ifneq ($(call find-command,mips-suse-linux-ld),)
+  CROSS := mips-suse-linux-
 else
   $(error Unable to detect a suitable MIPS toolchain installed)
+endif
+else
+CROSS := $(MIPS_CROSS)
 endif
 
 AS        := $(CROSS)as
@@ -429,7 +435,11 @@ TARGET_CFLAGS := -nostdinc -DTARGET_N64 -D_LANGUAGE_C
 CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
-CC_CHECK := gcc
+ifneq ($(call find-command,aarch64-linux-gnu-gcc),)
+  CC_CHECK := x86_64-linux-gnu-gcc
+else
+  CC_CHECK := gcc
+endif
 CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
 
 # C compiler options
@@ -494,7 +504,7 @@ ifeq ($(ENABLE_OPENGL),1)
   GFX_LDFLAGS :=
   ifeq ($(TARGET_WINDOWS),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags) -DGLEW_STATIC
-    GFX_LDFLAGS += $(shell sdl2-config --libs) -lglew32 -lopengl32 -lwinmm -limm32 -lversion -loleaut32 -lsetupapi
+    GFX_LDFLAGS += $(shell sdl2-config --libs) -Llib -lpthread -lglew32 -lm -lglu32 -lsetupapi -ldinput8 -luser32 -lgdi32 -limm32 -lole32 -loleaut32 -lshell32 -lwinmm -lversion -luuid -lopengl32 -static
   endif
   ifeq ($(TARGET_LINUX),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags)
