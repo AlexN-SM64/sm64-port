@@ -6,7 +6,6 @@
 #include "heap.h"
 #include "load.h"
 #include "seqplayer.h"
-#include "PR/os.h" //! Fix the build using GCC version 14
 
 #define ALIGN16(val) (((val) + 0xF) & ~0xF)
 
