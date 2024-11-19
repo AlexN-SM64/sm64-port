@@ -51,6 +51,8 @@ ifeq ($(TARGET_N64),0)
       ifneq ($(ENABLE_DX12),1)
         ENABLE_DX11 ?= 1
       endif
+    else
+      $(warning After building for Windows with OpenGL backend, the game may causes maximum FPS.)
     endif
   else
     # On others, default to OpenGL
@@ -504,7 +506,7 @@ ifeq ($(ENABLE_OPENGL),1)
   GFX_LDFLAGS :=
   ifeq ($(TARGET_WINDOWS),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags) -DGLEW_STATIC
-    GFX_LDFLAGS += $(shell sdl2-config --libs) -Llib -lpthread -lglew32 -lm -lglu32 -lsetupapi -ldinput8 -luser32 -lgdi32 -limm32 -lole32 -loleaut32 -lshell32 -lwinmm -lversion -luuid -lopengl32 -static
+    GFX_LDFLAGS += $(shell sdl2-config --libs) -lglew32 -lopengl32 -lwinmm -limm32 -lversion -loleaut32 -lsetupapi
   endif
   ifeq ($(TARGET_LINUX),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags)
