@@ -691,7 +691,7 @@ $(BUILD_DIR)/%.inc.c: %.png
 	$(call print,Converting:,$<,$@)
 	$(V)$(N64GRAPHICS) -s $(TEXTURE_ENCODING) -i $@ -g $< -f $(lastword ,$(subst ., ,$(basename $<)))
 
-# JP/EU Font texture format fix (for PC)
+# JP/EU Font texture format fix (not only for PC)
 ifeq ($(TARGET_N64),0)
 
 # JP font texture format fix
