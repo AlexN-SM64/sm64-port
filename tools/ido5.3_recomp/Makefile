@@ -1,3 +1,13 @@
+include ../../include/detect_cross.mk
+
+ifeq ($(SWITCH_TO_CROSS),1)
+CC  := $(PLATFORM_CROSS)gcc
+CXX := $(PLATFORM_CROSS)g++
+else
+CC  := gcc
+CXX := g++
+endif
+
 IRIX_ROOT := ../ido5.3_compiler
 
 cc: OPT_CFLAGS := -O2

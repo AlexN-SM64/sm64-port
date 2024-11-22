@@ -1,10 +1,16 @@
 include ../util.mk
+include ../include/detect_cross.mk
 
 HOST_ENV := $(shell uname 2>/dev/null || echo Unknown)
 HOST_ENV := $(patsubst MINGW%,MinGW,$(HOST_ENV))
 
+ifeq ($(SWITCH_TO_CROSS),1)
+CC           := $(PLATFORM_CROSS)gcc
+CXX          := $(PLATFORM_CROSS)g++
+else
 CC           := gcc
 CXX          := g++
+endif
 CFLAGS       := -I . -Wall -Wextra -Wno-unused-parameter -pedantic -O2 -s
 LDFLAGS      := -lm
 ALL_PROGRAMS := armips n64graphics n64graphics_ci mio0 n64cksum textconv patch_elf_32bit aifc_decode aiff_extract_codebook vadpcm_enc tabledesign extract_data_for_mio skyconv
@@ -64,8 +70,8 @@ all: all-except-recomp ido5.3_recomp
 
 clean:
 	$(RM) $(ALL_PROGRAMS)
-	$(MAKE) -C audiofile clean
-	$(MAKE) -C ido5.3_recomp clean
+	$(MAKE) -C audiofile clean $(MAKE_OPTFLAGS)
+	$(MAKE) -C ido5.3_recomp clean $(MAKE_OPTFLAGS)
 
 define COMPILE
 $(1): $($1_SOURCES)
@@ -73,11 +79,11 @@ $(1): $($1_SOURCES)
 endef
 
 ido5.3_recomp:
-	$(MAKE) -C ido5.3_recomp
+	$(MAKE) -C ido5.3_recomp $(MAKE_OPTFLAGS)
 
 $(foreach p,$(BUILD_PROGRAMS),$(eval $(call COMPILE,$(p))))
 
 $(LIBAUDIOFILE):
-	@$(MAKE) -C audiofile
+	@$(MAKE) -C audiofile $(MAKE_OPTFLAGS)
 
 .PHONY: all all-except-recomp clean default ido5.3_recomp
