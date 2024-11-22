@@ -1,7 +1,7 @@
 # Detect architectures for Windows builds
 ifeq ($(TARGET_WINDOWS),1)
 
-ifeq ($(arch),aarch64)
+ifeq ($(shell arch),aarch64)
 
   ifneq ($(call find-command,aarch64-w64-mingw32-gcc),)
     ARCHITECTURE ?= aarch64
@@ -15,7 +15,7 @@ ifeq ($(arch),aarch64)
   
   $(eval $(call validate-option,ARCHITECTURE,aarch64 x86_64 i686))
 
-else ifeq ($(arch),x86_64)
+else ifeq ($(shell arch),x86_64)
 
   ifneq ($(call find-command,x86_64-w64-mingw32-gcc),)
     ARCHITECTURE ?= x86_64
@@ -27,7 +27,7 @@ else ifeq ($(arch),x86_64)
   
   $(eval $(call validate-option,ARCHITECTURE,x86_64 i686))
 
-else ifeq ($(arch),i686)
+else ifeq ($(shell arch),i686)
 
   ARCHITECTURE ?= i686
   
@@ -35,7 +35,7 @@ else ifeq ($(arch),i686)
 
 endif
 
-ARCHITECTURE ?= $(arch)
+ARCHITECTURE ?= $(shell arch)
 
 PLATFORM_CROSS := $(ARCHITECTURE)-w64-mingw32-
 
@@ -44,7 +44,7 @@ endif
 # Detect architectures for Linux builds
 ifeq ($(TARGET_LINUX),1)
 
-ifeq ($(arch),aarch64)
+ifeq ($(shell arch),aarch64)
 
   ifneq ($(call find-command,aarch64-linux-gnu-gcc),)
     ARCHITECTURE ?= aarch64
@@ -58,7 +58,7 @@ ifeq ($(arch),aarch64)
   
   $(eval $(call validate-option,ARCHITECTURE,aarch64 x86_64 i686))
 
-else ifeq ($(arch),x86_64)
+else ifeq ($(shell arch),x86_64)
 
   ifneq ($(call find-command,x86_64-linux-gnu-gcc),)
     ARCHITECTURE ?= x86_64
@@ -70,7 +70,7 @@ else ifeq ($(arch),x86_64)
   
   $(eval $(call validate-option,ARCHITECTURE,x86_64 i686))
 
-else ifeq ($(arch),i686)
+else ifeq ($(shell arch),i686)
 
   ARCHITECTURE ?= i686
   
@@ -78,7 +78,7 @@ else ifeq ($(arch),i686)
 
 endif
 
-ARCHITECTURE ?= $(arch)
+ARCHITECTURE ?= $(shell arch)
 
 PLATFORM_CROSS := $(ARCHITECTURE)-linux-gnu-
 
@@ -100,8 +100,8 @@ else
 endif
 
 # Detect CC check for N64 builds
-ifneq ($(arch),x86_64)
-ifneq ($(arch),i686)
+ifneq ($(shell arch),x86_64)
+ifneq ($(shell arch),i686)
 
   ifneq ($(call find-command,x86_64-linux-gnu-gcc),)
     CC_CHECK_CROSS ?= x86_64-linux-gnu-
