@@ -121,6 +121,8 @@ MAKE_OPTFLAGS :=
 # Add options for makefiles
 ifeq ($(TARGET_WINDOWS),1)
   TOOLS_BUILD_CROSS ?= 1
+else
+  TOOLS_BUILD_CROSS ?= 0
 endif
 
 ifeq ($(TOOLS_BUILD_CROSS),1)
