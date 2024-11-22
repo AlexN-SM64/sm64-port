@@ -119,6 +119,10 @@ endif
 MAKE_OPTFLAGS :=
 
 # Add options for makefiles
+ifeq ($(TARGET_WINDOWS),1)
+  TOOLS_BUILD_CROSS ?= 1
+endif
+
 ifeq ($(TOOLS_BUILD_CROSS),1)
   MAKE_OPTFLAGS += TOOLS_BUILD_CROSS=1 PLATFORM_CROSS=$(PLATFORM_CROSS)
 endif
