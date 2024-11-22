@@ -1,9 +1,6 @@
 include ../util.mk
 include ../include/detect_cross.mk
 
-HOST_ENV := $(shell uname 2>/dev/null || echo Unknown)
-HOST_ENV := $(patsubst MINGW%,MinGW,$(HOST_ENV))
-
 ifeq ($(SWITCH_TO_CROSS),1)
 CC           := $(PLATFORM_CROSS)gcc
 CXX          := $(PLATFORM_CROSS)g++
@@ -60,7 +57,7 @@ armips: CC := $(CXX)
 armips_SOURCES := armips.cpp
 armips_CFLAGS  := -std=c++11 -fno-exceptions -fno-rtti -pipe
 armips_LDFLAGS := -pthread
-ifeq ($(HOST_ENV),MinGW)
+ifeq ($(CXX),$(ARCHITECTURE)-w64-mingw32-g++)
   armips_LDFLAGS += -municode
 endif
 
