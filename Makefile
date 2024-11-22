@@ -85,6 +85,8 @@ ifeq ($(TARGET_N64),0)
 
 endif
 
+include include/detect_cross.mk
+
 ifeq ($(COMPILER),gcc)
   NON_MATCHING := 1
 endif
@@ -395,26 +397,9 @@ DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 
 ifeq ($(TARGET_N64),1)
 
-# detect prefix for MIPS toolchain
-ifeq ($(MIPS_CROSS),)
-ifneq      ($(call find-command,mips-linux-gnu-ld),)
-  CROSS := mips-linux-gnu-
-else ifneq ($(call find-command,mips64-linux-gnu-ld),)
-  CROSS := mips64-linux-gnu-
-else ifneq ($(call find-command,mips64-elf-ld),)
-  CROSS := mips64-elf-
-else ifneq ($(call find-command,mips-suse-linux-ld),)
-  CROSS := mips-suse-linux-
-else
-  $(error Unable to detect a suitable MIPS toolchain installed)
-endif
-else
-CROSS := $(MIPS_CROSS)
-endif
-
-AS        := $(CROSS)as
+AS        := $(MIPS_CROSS)as
 ifeq ($(COMPILER),gcc)
-  CC      := $(CROSS)gcc
+  CC      := $(MIPS_CROSS)gcc
 else
   ifeq ($(USE_QEMU_IRIX),1)
     IRIX_ROOT := $(TOOLS_DIR)/ido5.3_compiler
@@ -428,20 +413,16 @@ else
     COPT    := $(IDO_ROOT)/copt
   endif
 endif
-LD        := $(CROSS)ld
-AR        := $(CROSS)ar
-OBJDUMP   := $(CROSS)objdump
-OBJCOPY   := $(CROSS)objcopy
+LD        := $(MIPS_CROSS)ld
+AR        := $(MIPS_CROSS)ar
+OBJDUMP   := $(MIPS_CROSS)objdump
+OBJCOPY   := $(MIPS_CROSS)objcopy
 
 TARGET_CFLAGS := -nostdinc -DTARGET_N64 -D_LANGUAGE_C
 CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
-ifneq ($(call find-command,aarch64-linux-gnu-gcc),)
-  CC_CHECK := x86_64-linux-gnu-gcc
-else
-  CC_CHECK := gcc
-endif
+CC_CHECK := $(CC_CHECK_CROSS)gcc
 CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
 
 # C compiler options
@@ -468,10 +449,10 @@ export LANG := C
 
 else # TARGET_N64
 
-AS := as
+AS := $(PLATFORM_CROSS)as
 ifneq ($(TARGET_WEB),1)
-  CC := gcc
-  CXX := g++
+  CC := $(PLATFORM_CROSS)gcc
+  CXX := $(PLATFORM_CROSS)g++
 else
   CC := emcc
 endif
@@ -480,8 +461,8 @@ ifeq ($(CXX_FILES),"")
 else
   LD := $(CXX)
 endif
-OBJDUMP := objdump
-OBJCOPY := objcopy
+OBJDUMP := $(PLATFORM_CROSS)objdump
+OBJCOPY := $(PLATFORM_CROSS)objcopy
 PYTHON := python3
 
 # Platform-specific compiler and linker flags
@@ -539,10 +520,10 @@ endif
 
 # Prefer clang as C preprocessor if installed on the system
 ifneq (,$(call find-command,clang))
-  CPP      := clang
+  CPP      := $(PLATFORM_CROSS)clang
   CPPFLAGS := -E -P -x c -Wno-trigraphs $(DEF_INC_CFLAGS)
 else
-  CPP      := cpp
+  CPP      := $(PLATFORM_CROSS)cpp
   CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
 endif
 
@@ -691,20 +672,7 @@ $(BUILD_DIR)/%.inc.c: %.png
 	$(call print,Converting:,$<,$@)
 	$(V)$(N64GRAPHICS) -s $(TEXTURE_ENCODING) -i $@ -g $< -f $(lastword ,$(subst ., ,$(basename $<)))
 
-# JP/EU Font texture format fix (not only for PC)
-ifeq ($(TARGET_N64),0)
-
-# JP font texture format fix
-$(BUILD_DIR)/$(TEXTURE_DIR)/segment2/segment2.%.ia1.inc.c: $(TEXTURE_DIR)/segment2/segment2.%.ia1.png
-	$(call print,Converting to IA8:,$<,$@)
-	$(V)$(N64GRAPHICS) -s $(TEXTURE_ENCODING) -i $@ -g $< -f ia8
-
-# EU font texture format fix
-$(BUILD_DIR)/$(TEXTURE_DIR)/segment2/font_graphics.%.ia1.inc.c: $(TEXTURE_DIR)/segment2/font_graphics.%.ia1.png
-	$(call print,Converting to IA4:,$<,$@)
-	$(V)$(N64GRAPHICS) -s $(TEXTURE_ENCODING) -i $@ -g $< -f ia4
-
-endif
+include include/font_fix_pc.mk
 
 # Color Index CI8
 $(BUILD_DIR)/%.ci8: %.ci8.png
