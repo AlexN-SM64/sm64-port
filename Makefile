@@ -449,7 +449,12 @@ export LANG := C
 
 else # TARGET_N64
 
+ifneq ($(call find-command,$(PLATFORM_CROSS)as),)
 AS := $(PLATFORM_CROSS)as
+else
+AS := as
+endif
+
 ifneq ($(TARGET_WEB),1)
   CC := $(PLATFORM_CROSS)gcc
   CXX := $(PLATFORM_CROSS)g++
@@ -461,8 +466,19 @@ ifeq ($(CXX_FILES),"")
 else
   LD := $(CXX)
 endif
+
+ifneq ($(call find-command,$(PLATFORM_CROSS)objdump),)
 OBJDUMP := $(PLATFORM_CROSS)objdump
+else
+OBJDUMP := objdump
+endif
+
+ifneq ($(call find-command,$(PLATFORM_CROSS)objcopy),)
 OBJCOPY := $(PLATFORM_CROSS)objcopy
+else
+OBJCOPY := objcopy
+endif
+
 PYTHON := python3
 
 # Platform-specific compiler and linker flags
@@ -520,7 +536,13 @@ endif
 
 # Prefer clang as C preprocessor if installed on the system
 ifneq (,$(call find-command,clang))
+
+ifneq ($(call find-command,$(PLATFORM_CROSS)clang),)
   CPP      := $(PLATFORM_CROSS)clang
+else
+  CPP      := clang
+endif
+
   CPPFLAGS := -E -P -x c -Wno-trigraphs $(DEF_INC_CFLAGS)
 else
   CPP      := $(PLATFORM_CROSS)cpp
