@@ -257,7 +257,7 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
 
   # Make tools if out of date
   $(info Building tools...)
-  DUMMY != $(MAKE) -s -C $(TOOLS_DIR) $(if $(filter-out ido0,$(COMPILER)$(USE_QEMU_IRIX)),all-except-recomp,) $(MAKE_OPTFLAGS) >&2 || echo FAIL
+  DUMMY != $(MAKE) -s -C $(TOOLS_DIR) $(if $(filter-out ido0,$(COMPILER)$(USE_QEMU_IRIX)),all-except-recomp,) >&2 || echo FAIL
     ifeq ($(DUMMY),FAIL)
       $(error Failed to build tools)
     endif
@@ -615,7 +615,7 @@ clean:
 
 distclean: clean
 	$(PYTHON) extract_assets.py --clean
-	$(MAKE) -C $(TOOLS_DIR) clean $(MAKE_OPTFLAGS)
+	$(MAKE) -C $(TOOLS_DIR) clean
 
 test: $(ROM)
 	$(EMULATOR) $(EMU_FLAGS) $<

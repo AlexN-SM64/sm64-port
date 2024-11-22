@@ -115,16 +115,3 @@ endif
 endif
 
 endif
-
-MAKE_OPTFLAGS :=
-
-# Add options for makefiles
-ifeq ($(TARGET_WINDOWS),1)
-  SWITCH_TO_CROSS ?= 1
-else
-  SWITCH_TO_CROSS ?= 0
-endif
-
-ifeq ($(SWITCH_TO_CROSS),1)
-  MAKE_OPTFLAGS += SWITCH_TO_CROSS=1
-endif

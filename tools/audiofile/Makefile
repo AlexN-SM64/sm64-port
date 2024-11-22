@@ -1,12 +1,4 @@
-include ../../include/detect_cross.mk
-
-ifeq ($(SWITCH_TO_CROSS),1)
-AR  := $(PLATFORM_CROSS)ar
-CXX := $(PLATFORM_CROSS)g++
-else
-AR  := ar
 CXX := g++
-endif
 
 libaudiofile.a: audiofile.o
 	$(AR) rcs $@ $^
