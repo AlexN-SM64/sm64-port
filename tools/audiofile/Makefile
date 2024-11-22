@@ -1,6 +1,6 @@
 include ../../include/detect_cross.mk
 
-ifeq ($(TOOLS_BUILD_CROSS),1)
+ifeq ($(SWITCH_TO_CROSS),1)
 AR  := $(PLATFORM_CROSS)ar
 CXX := $(PLATFORM_CROSS)g++
 else
