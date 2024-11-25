@@ -95,6 +95,8 @@ else ifneq ($(call find-command,mips64-elf-ld),)
   MIPS_CROSS ?= mips64-elf-
 else ifneq ($(call find-command,mips-suse-linux-ld),)
   MIPS_CROSS ?= mips-suse-linux-
+else ifneq ($(call find-command,mips-mti-elf-ld),)
+  MIPS_CROSS ?= mips-mti-elf-
 else
   MIPS_CROSS ?= mips-linux-gnu-
 endif
