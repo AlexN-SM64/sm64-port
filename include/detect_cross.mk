@@ -41,9 +41,9 @@ PLATFORM_CROSS := $(ARCHITECTURE)-w64-mingw32-
 
 endif
 
-AARCH64_CROSS := $(shell sh print_cmd_cross.sh aarch64)
-X86_64_CROSS := $(shell sh print_cmd_cross.sh x86_64)
-I686_CROSS := $(shell sh print_cmd_cross.sh i686)
+AARCH64_CROSS := $(shell bash print_cmd_cross.sh aarch64)
+X86_64_CROSS := $(shell bash print_cmd_cross.sh x86_64)
+I686_CROSS := $(shell bash print_cmd_cross.sh i686)
 
 # Detect architectures for Linux builds
 ifeq ($(TARGET_LINUX),1)
@@ -84,15 +84,15 @@ endif
 
 ARCHITECTURE ?= $(shell arch)
 
-PLATFORM_CROSS := $(shell sh print_cmd_cross.sh $(ARCHITECTURE))
+PLATFORM_CROSS := $(shell bash print_cmd_cross.sh $(ARCHITECTURE))
 
 endif
 
 ifeq ($(TARGET_N64),1)
 
 # Detect MIPS prefix for N64 builds
-MIPS_ARCH_CROSS ?= $(shell sh print_cmd_cross.sh mips)
-MIPS64_ARCH_CROSS ?= $(shell sh print_cmd_cross.sh mips64)
+MIPS_ARCH_CROSS ?= $(shell bash print_cmd_cross.sh mips)
+MIPS64_ARCH_CROSS ?= $(shell bash print_cmd_cross.sh mips64)
 
 ifneq ($(call find-command,$(MIPS_ARCH_CROSS)ld),)
   MIPS_CROSS ?= $(MIPS_ARCH_CROSS)
