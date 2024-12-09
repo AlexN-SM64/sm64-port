@@ -85,8 +85,6 @@ ifeq ($(TARGET_N64),0)
 
 endif
 
-include include/detect_cross.mk
-
 ifeq ($(COMPILER),gcc)
   NON_MATCHING := 1
 endif
@@ -211,6 +209,14 @@ endif
 
 # Whether to colorize build messages
 COLOR ?= 1
+
+# NO_CHECK - whether to don't check the C or C++ code
+#   1 - disable checking
+#   0 - check the C or C++ code for compiling
+NO_CHECK ?= 0
+$(eval $(call validate-option,NO_CHECK,0 1))
+
+include include/detect_cross.mk
 
 # display selected options unless 'make clean' or 'make distclean' is run
 ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
@@ -422,8 +428,10 @@ TARGET_CFLAGS := -nostdinc -DTARGET_N64 -D_LANGUAGE_C
 CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
+ifeq ($(NO_CHECK),0)
 CC_CHECK := $(CC_CHECK_CROSS)gcc
 CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
+endif
 
 # C compiler options
 CFLAGS = -G 0 $(OPT_FLAGS) $(TARGET_CFLAGS) $(MIPSISET) $(DEF_INC_CFLAGS)
@@ -441,7 +449,9 @@ ifeq ($(shell getconf LONG_BIT), 32)
   export QEMU_GUEST_BASE := 1
 else
   # Ensure that gcc treats the code as 32-bit
+ifeq ($(NO_CHECK),0)
   CC_CHECK_CFLAGS += -m32
+endif
 endif
 
 # Prevent a crash with -sopt
@@ -525,7 +535,9 @@ endif
 
 GFX_CFLAGS += -DWIDESCREEN
 
+ifeq ($(NO_CHECK),0)
 CC_CHECK := $(CC) -fsyntax-only -fsigned-char -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS)
+endif
 CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv -march=native
 
 ASFLAGS := -I include -I $(BUILD_DIR) $(foreach d,$(DEFINES),--defsym $(d))
@@ -854,15 +866,21 @@ $(GLOBAL_ASM_DEP).$(NON_MATCHING):
 # Compile C/C++ code
 $(BUILD_DIR)/%.o: %.cpp
 	$(call print,Compiling:,$<,$@)
+ifeq ($(NO_CHECK),0)
 	@$(CXX) -fsyntax-only $(CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
+endif
 	$(V)$(CXX) -c $(CFLAGS) -o $@ $<
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
+ifeq ($(NO_CHECK),0)
 	@$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
+endif
 	$(V)$(CC) -c $(CFLAGS) -o $@ $<
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c
 	$(call print,Compiling:,$<,$@)
+ifeq ($(NO_CHECK),0)
 	@$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
+endif
 	$(V)$(CC) -c $(CFLAGS) -o $@ $<
 
 # Alternate compiler flags needed for matching

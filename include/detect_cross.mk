@@ -39,11 +39,13 @@ ARCHITECTURE ?= $(shell arch)
 
 PLATFORM_CROSS := $(ARCHITECTURE)-w64-mingw32-
 
-endif
+else
 
 AARCH64_CROSS := $(shell bash print_cmd_cross.sh aarch64)
 X86_64_CROSS := $(shell bash print_cmd_cross.sh x86_64)
 I686_CROSS := $(shell bash print_cmd_cross.sh i686)
+
+endif
 
 # Detect architectures for Linux builds
 ifeq ($(TARGET_LINUX),1)
@@ -91,29 +93,31 @@ endif
 ifeq ($(TARGET_N64),1)
 
 # Detect MIPS prefix for N64 builds
-MIPS_ARCH_CROSS ?= $(shell bash print_cmd_cross.sh mips)
-MIPS64_ARCH_CROSS ?= $(shell bash print_cmd_cross.sh mips64)
+MIPS_ARCH_CROSS := $(shell bash print_cmd_cross.sh mips)
+MIPS64_ARCH_CROSS := $(shell bash print_cmd_cross.sh mips64)
 
 ifneq ($(call find-command,$(MIPS_ARCH_CROSS)ld),)
-  MIPS_CROSS ?= $(MIPS_ARCH_CROSS)
+  MIPS_CROSS := $(MIPS_ARCH_CROSS)
 else ifneq ($(call find-command,$(MIPS64_ARCH_CROSS)ld),)
-  MIPS_CROSS ?= $(MIPS64_ARCH_CROSS)
+  MIPS_CROSS := $(MIPS64_ARCH_CROSS)
 else
-  MIPS_CROSS ?= $(MIPS_ARCH_CROSS)
+  $(error Unable to detect a suitable MIPS toolchain installed)
 endif
 
 # Detect CC check for N64 builds
 ifneq ($(shell arch),x86_64)
 ifneq ($(shell arch),i686)
+ifeq ($(NO_CHECK),0)
 
   ifneq ($(call find-command,$(X86_64_CROSS)gcc),)
-    CC_CHECK_CROSS ?= $(X86_64_CROSS)
+    CC_CHECK_CROSS := $(X86_64_CROSS)
   else ifneq ($(call find-command,$(I686_CROSS)gcc),)
-    CC_CHECK_CROSS ?= $(I686_CROSS)
+    CC_CHECK_CROSS := $(I686_CROSS)
   else
-    CC_CHECK_CROSS ?= $(X86_64_CROSS)
+    $(error CC check for N64 build is only possible for GCC i686 or x86_64 architectures. Make sure NO_CHECK is set to 1)
   endif
 
+endif
 endif
 endif
 
