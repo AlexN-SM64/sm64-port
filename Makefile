@@ -545,7 +545,13 @@ endif
 
   CPPFLAGS := -E -P -x c -Wno-trigraphs $(DEF_INC_CFLAGS)
 else
+
+ifneq ($(call find-command,$(PLATFORM_CROSS)cpp),)
   CPP      := $(PLATFORM_CROSS)cpp
+else
+  CPP      := cpp
+endif
+
   CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
 endif
 
