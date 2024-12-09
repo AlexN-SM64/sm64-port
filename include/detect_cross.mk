@@ -45,7 +45,7 @@ ifeq ($(TARGET_N64),1)
 
 # Detect MIPS prefix for N64 builds
 MIPS_CROSS := $(shell bash print_cmd_cross.sh mips)
-ifeq ($(call find-command,$(shell bash print_cmd_cross.sh mips)ld),)
+ifeq ($(call find-command,$(MIPS_CROSS)ld),)
   $(error Unable to detect a suitable MIPS toolchain installed)
 endif
 
