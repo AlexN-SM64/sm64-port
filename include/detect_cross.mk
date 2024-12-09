@@ -107,15 +107,17 @@ endif
 # Detect CC check for N64 builds
 ifneq ($(shell arch),x86_64)
 ifneq ($(shell arch),i686)
+ifeq ($(NO_CHECK),0)
 
   ifneq ($(call find-command,$(X86_64_CROSS)gcc),)
     CC_CHECK_CROSS := $(X86_64_CROSS)
   else ifneq ($(call find-command,$(I686_CROSS)gcc),)
     CC_CHECK_CROSS := $(I686_CROSS)
   else
-    $(error CC check for N64 build is only possible for GCC i686 or x86_64 architectures)
+    $(error CC check for N64 build is only possible for GCC i686 or x86_64 architectures. Make sure NO_CHECK is set to 1)
   endif
 
+endif
 endif
 endif
 
