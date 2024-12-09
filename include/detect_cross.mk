@@ -54,10 +54,10 @@ ifneq ($(shell arch),x86_64)
 ifneq ($(shell arch),i686)
 ifeq ($(NO_CHECK),0)
 
-  ifneq ($(call find-command,x86_64-linux-gnu-gcc),)
-    CC_CHECK_CROSS := x86_64-linux-gnu-
-  else ifneq ($(call find-command,i686-linux-gnu-gcc),)
+  ifneq ($(call find-command,i686-linux-gnu-gcc),)
     CC_CHECK_CROSS := i686-linux-gnu-
+  else
+    CC_CHECK_CROSS := x86_64-linux-gnu-
   endif
 
 endif
