@@ -41,8 +41,10 @@ NO_DASH_TYPE=$4
 
 if [[ $OS == Windows_NT ]]; then
 EXE=.exe
-fi
 CMD_EXE=$CMD$EXE
+else
+CMD_EXE=$CMD
+fi
 
 if ! [[ $NO_DASH_TYPE == no_prefix_dash ]] || ! [[ $NO_DASH_TYPE == no_dashes ]]; then
 PREFIX_DASH=-
@@ -56,7 +58,9 @@ DASH_CMD=$SUFFIX_DASH$CMD_EXE
 
 ARCH_STRING_LENGTH=${#ARCH}
 CMD_STRING_LENGTH=${#CMD_EXE}
+if [[ $OS == Windows_NT ]]; then
 EXE_STRING_LENGTH=${#EXE}
+fi
 
 CMDLIST_BY_ARCH=$(compgen -c $ARCH_DASH | sort)
 TARGET_CMD=$(for TARGET in $CMDLIST_BY_ARCH; do if [[ $TARGET == *$DASH_CMD ]]; then echo $TARGET; fi; done | head -1)
@@ -64,7 +68,11 @@ TARGET_CMD=$(for TARGET in $CMDLIST_BY_ARCH; do if [[ $TARGET == *$DASH_CMD ]]; 
 if [[ $TYPE == cross_prefix ]]; then
 echo ${TARGET_CMD::-$CMD_STRING_LENGTH}
 elif [[ $TYPE == find_command ]]; then
+if [[ $OS == Windows_NT ]]; then
 echo ${TARGET_CMD::-$EXE_STRING_LENGTH}
+else
+echo $TARGET_CMD
+fi
 else
 echo "Usage: $0 [ cross_prefix | find_command ] <architecture> <command> [ no_prefix_dash | no_suffix_dash | no_dashes ]"
 exit 1
