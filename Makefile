@@ -436,10 +436,10 @@ CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
 ifeq ($(NO_CHECK),0)
-  ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)),)
-    CC_CHECK := $(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)
-  else
+  ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc),)
     CC_CHECK := $(CC_CHECK_CROSS)gcc
+  else ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CC_CHECK := $(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)
   endif
   CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
 endif
@@ -571,24 +571,10 @@ endif
 
 # Prefer clang as C preprocessor if installed on the system
 ifneq (,$(call find-command,clang))
-
-ifneq ($(call find-command,$(PLATFORM_CROSS)clang),)
-  CPP      := $(PLATFORM_CROSS)clang
-else
   CPP      := clang
-endif
-
   CPPFLAGS := -E -P -x c -Wno-trigraphs $(DEF_INC_CFLAGS)
 else
-
-ifneq ($(call find-command,$(PLATFORM_CROSS)cpp),)
-  CPP      := $(PLATFORM_CROSS)cpp
-else ifneq ($(call find-command,$(PLATFORM_CROSS)cpp$(CC_VERSION_SUFFIX)),)
-  CPP      := $(PLATFORM_CROSS)cpp$(CC_VERSION_SUFFIX)
-else
   CPP      := cpp
-endif
-
   CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
 endif
 

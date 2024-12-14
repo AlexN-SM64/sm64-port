@@ -1,3 +1,6 @@
+DASH := -
+CC_VERSION_SUFFIX := $(DASH)$(gcc -dumpversion)
+
 ifeq ($(TARGET_N64),1)
 
   # Detect prefix for N64 builds
@@ -18,12 +21,12 @@ ifeq ($(TARGET_N64),1)
         CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix i686 gcc no_prefix_dash)
       else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command powerpc gcc no_prefix_dash)),)
         CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix powerpc gcc no_prefix_dash)
-      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command x86_64 gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)),)
-        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix x86_64 gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)
-      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command i686 gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)),)
-        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix i686 gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)
-      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command powerpc gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)),)
-        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix powerpc gcc$(CC_BASE_VERSION_SUFFIX) no_prefix_dash)
+      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command x86_64 gcc$(CC_VERSION_SUFFIX) no_prefix_dash)),)
+        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix x86_64 gcc$(CC_VERSION_SUFFIX) no_prefix_dash)
+      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command i686 gcc$(CC_VERSION_SUFFIX) no_prefix_dash)),)
+        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix i686 gcc$(CC_VERSION_SUFFIX) no_prefix_dash)
+      else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command powerpc gcc$(CC_VERSION_SUFFIX) no_prefix_dash)),)
+        CC_CHECK_CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix powerpc gcc$(CC_VERSION_SUFFIX) no_prefix_dash)
       endif
       ifeq ($(findstring x86_64,$(CC_CHECK_CROSS)),)
         ifeq ($(findstring i686,$(CC_CHECK_CROSS)),)
@@ -32,20 +35,12 @@ ifeq ($(TARGET_N64),1)
           endif
         endif
       endif
-  
-      ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc),)
-        CC_CHECK := $(CC_CHECK_CROSS)gcc
-      else ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc$(CC_BASE_VERSION_SUFFIX)),)
-        CC_CHECK := $(CC_CHECK_CROSS)gcc$(CC_BASE_VERSION_SUFFIX)
-      endif
     endif
   
   endif
 
-endif
-
 # Detect architectures for Windows builds
-ifeq ($(TARGET_WINDOWS),1)
+else ifeq ($(TARGET_WINDOWS),1)
 
   ifeq ($(shell arch),aarch64)
     ifneq ($(call find-command,x86_64-w64-mingw32-gcc),)
