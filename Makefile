@@ -416,6 +416,8 @@ DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 DASH := -
 CC_VERSION_SUFFIX := $(DASH)$(gcc -dumpversion)
 
+CC_CHECK_BYPASS := 0
+
 ifeq ($(TARGET_N64),1)
 
 # detect prefix for MIPS toolchain
@@ -459,17 +461,6 @@ CC_CFLAGS := -fno-builtin
 CC_CHECK := gcc
 CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
 
-# Bypass check if host compiler for that architecture is outside
-ifeq ($(shell arch),x86_64)
-  CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),i686)
-  CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),powerpc)
-  CC_CHECK_BYPASS := 0
-else
-  CC_CHECK_BYPASS := 1
-endif
-
 # C compiler options
 CFLAGS = -G 0 $(OPT_FLAGS) $(TARGET_CFLAGS) $(MIPSISET) $(DEF_INC_CFLAGS)
 ifeq ($(COMPILER),gcc)
@@ -485,6 +476,24 @@ ifeq ($(shell getconf LONG_BIT), 32)
   # Work around memory allocation bug in QEMU
   export QEMU_GUEST_BASE := 1
 else
+
+# Bypass check if host compiler for that architecture is outside
+ifeq      ($(shell arch),x86_64)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),i686)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),powerpc)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),powerpc64)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),powerpc64le)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),x32)
+  CC_CHECK_BYPASS := 0
+else
+  CC_CHECK_BYPASS := 1
+endif
+
   # Ensure that gcc treats the code as 32-bit
   CC_CHECK_CFLAGS += -m32
 endif
@@ -494,8 +503,6 @@ export LANG := C
 
 else # TARGET_N64
 
-# Detect architectures for Windows builds
-# NOTE: Use cygwin instead of MSYS2 MinGW
 ifeq ($(TARGET_WINDOWS),1)
   CROSS := $(ARCHITECTURE)-w64-mingw32-
 endif
