@@ -89,6 +89,26 @@ ifeq ($(COMPILER),gcc)
   NON_MATCHING := 1
 endif
 
+# ARCHITECTURE - select the architecture for Windows
+#   x86_64 - builds the game for 64-bit Windows
+#   i686   - builds the game for 32-bit Windows
+# NOTE: Use cygwin instead of MSYS2 MinGW
+ifeq ($(TARGET_WINDOWS),1)
+  ifeq ($(shell arch),i686)
+    ARCHITECTURE ?= i686
+    $(eval $(call validate-option,ARCHITECTURE,i686))
+  else
+    ifneq ($(call find-command,x86_64-w64-mingw32-gcc),)
+      ARCHITECTURE ?= x86_64
+    else ifneq ($(call find-command,i686-w64-mingw32-gcc),)
+      ARCHITECTURE ?= i686
+    else
+      ARCHITECTURE ?= x86_64
+    endif
+    $(eval $(call validate-option,ARCHITECTURE,i686 x86_64))
+  endif
+endif
+
 # VERSION - selects the version of the game to build
 #   jp - builds the 1996 Japanese version
 #   us - builds the 1996 North American version
@@ -209,14 +229,6 @@ endif
 
 # Whether to colorize build messages
 COLOR ?= 1
-
-# NO_CHECK - whether to don't check the C or C++ code
-#   1 - disable checking
-#   0 - check the C or C++ code for compiling
-NO_CHECK ?= 0
-$(eval $(call validate-option,NO_CHECK,0 1))
-
-include include/detect_cross.mk
 
 # display selected options unless 'make clean' or 'make distclean' is run
 ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
@@ -406,12 +418,21 @@ CC_VERSION_SUFFIX := $(DASH)$(gcc -dumpversion)
 
 ifeq ($(TARGET_N64),1)
 
-AS        := $(MIPS_CROSS)as
+# detect prefix for MIPS toolchain
+ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command mips ld)),)
+  CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix mips ld)
+else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command mips64 ld)),)
+  CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix mips64 ld)
+else
+  $(error Unable to detect a suitable MIPS toolchain installed)
+endif
+
+AS        := $(CROSS)as
 ifeq ($(COMPILER),gcc)
-  ifneq ($(call find-command,$(MIPS_CROSS)gcc$(CC_VERSION_SUFFIX)),)
-    CC      := $(MIPS_CROSS)gcc$(CC_VERSION_SUFFIX)
+  ifneq ($(call find-command,$(CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CC      := $(CROSS)gcc$(CC_VERSION_SUFFIX)
   else
-    CC      := $(MIPS_CROSS)gcc
+    CC      := $(CROSS)gcc
   endif
 else
   ifeq ($(USE_QEMU_IRIX),1)
@@ -426,22 +447,27 @@ else
     COPT    := $(IDO_ROOT)/copt
   endif
 endif
-LD        := $(MIPS_CROSS)ld
-AR        := $(MIPS_CROSS)ar
-OBJDUMP   := $(MIPS_CROSS)objdump
-OBJCOPY   := $(MIPS_CROSS)objcopy
+LD        := $(CROSS)ld
+AR        := $(CROSS)ar
+OBJDUMP   := $(CROSS)objdump
+OBJCOPY   := $(CROSS)objcopy
 
 TARGET_CFLAGS := -nostdinc -DTARGET_N64 -D_LANGUAGE_C
 CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
-ifeq ($(NO_CHECK),0)
-  ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc),)
-    CC_CHECK := $(CC_CHECK_CROSS)gcc
-  else ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)),)
-    CC_CHECK := $(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)
-  endif
-  CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
+CC_CHECK := gcc
+CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
+
+# Bypass check if host compiler for that architecture is outside
+ifeq ($(shell arch),x86_64)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),i686)
+  CC_CHECK_BYPASS := 0
+else ifeq ($(shell arch),powerpc)
+  CC_CHECK_BYPASS := 0
+else
+  CC_CHECK_BYPASS := 1
 endif
 
 # C compiler options
@@ -460,9 +486,7 @@ ifeq ($(shell getconf LONG_BIT), 32)
   export QEMU_GUEST_BASE := 1
 else
   # Ensure that gcc treats the code as 32-bit
-ifeq ($(NO_CHECK),0)
   CC_CHECK_CFLAGS += -m32
-endif
 endif
 
 # Prevent a crash with -sopt
@@ -470,27 +494,21 @@ export LANG := C
 
 else # TARGET_N64
 
-ifneq ($(call find-command,$(PLATFORM_CROSS)as),)
-AS := $(PLATFORM_CROSS)as
+# Detect architectures for Windows builds
+# NOTE: Use cygwin instead of MSYS2 MinGW
+ifeq ($(TARGET_WINDOWS),1)
+  CROSS := $(ARCHITECTURE)-w64-mingw32-
+endif
+
+ifneq ($(call find-command,$(CROSS)as),)
+AS := $(CROSS)as
 else
 AS := as
 endif
 
 ifneq ($(TARGET_WEB),1)
-  ifneq ($(call find-command,$(PLATFORM_CROSS)gcc),)
-    CC := $(PLATFORM_CROSS)gcc
-  else ifneq ($(call find-command,$(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)),)
-    CC := $(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)
-  else
-    CC := gcc
-  endif
-  ifneq ($(call find-command,$(PLATFORM_CROSS)g++),)
-    CXX := $(PLATFORM_CROSS)g++
-  else ifneq ($(call find-command,$(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)),)
-    CXX := $(PLATFORM_CROSS)g++$(CC_VERSION_SUFFIX)
-  else
-    CXX := g++
-  endif
+  CC := $(CROSS)gcc
+  CXX := $(CROSS)g++
 else
   CC := emcc
 endif
@@ -500,14 +518,14 @@ else
   LD := $(CXX)
 endif
 
-ifneq ($(call find-command,$(PLATFORM_CROSS)objdump),)
-OBJDUMP := $(PLATFORM_CROSS)objdump
+ifneq ($(call find-command,$(CROSS)objdump),)
+OBJDUMP := $(CROSS)objdump
 else
 OBJDUMP := objdump
 endif
 
-ifneq ($(call find-command,$(PLATFORM_CROSS)objcopy),)
-OBJCOPY := $(PLATFORM_CROSS)objcopy
+ifneq ($(call find-command,$(CROSS)objcopy),)
+OBJCOPY := $(CROSS)objcopy
 else
 OBJCOPY := objcopy
 endif
@@ -558,9 +576,7 @@ endif
 
 GFX_CFLAGS += -DWIDESCREEN
 
-ifeq ($(NO_CHECK),0)
 CC_CHECK := $(CC) -fsyntax-only -fsigned-char -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS)
-endif
 CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv -march=native
 
 ASFLAGS := -I include -I $(BUILD_DIR) $(foreach d,$(DEFINES),--defsym $(d))
@@ -877,19 +893,17 @@ $(GLOBAL_ASM_DEP).$(NON_MATCHING):
 # Compile C/C++ code
 $(BUILD_DIR)/%.o: %.cpp
 	$(call print,Compiling:,$<,$@)
-ifeq ($(NO_CHECK),0)
 	@$(CXX) -fsyntax-only $(CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
-endif
 	$(V)$(CXX) -c $(CFLAGS) -o $@ $<
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
-ifeq ($(NO_CHECK),0)
+ifeq ($(CC_CHECK_BYPASS),0)
 	@$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
 endif
 	$(V)$(CC) -c $(CFLAGS) -o $@ $<
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c
 	$(call print,Compiling:,$<,$@)
-ifeq ($(NO_CHECK),0)
+ifeq ($(CC_CHECK_BYPASS),0)
 	@$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
 endif
 	$(V)$(CC) -c $(CFLAGS) -o $@ $<
