@@ -401,11 +401,18 @@ endif
 C_DEFINES := $(foreach d,$(DEFINES),-D$(d))
 DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 
+DASH := -
+CC_VERSION_SUFFIX := $(DASH)$(gcc -dumpversion)
+
 ifeq ($(TARGET_N64),1)
 
 AS        := $(MIPS_CROSS)as
 ifeq ($(COMPILER),gcc)
-  CC      := $(MIPS_CROSS)gcc
+  ifneq ($(call find-command,$(MIPS_CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CC      := $(MIPS_CROSS)gcc$(CC_VERSION_SUFFIX)
+  else
+    CC      := $(MIPS_CROSS)gcc
+  endif
 else
   ifeq ($(USE_QEMU_IRIX),1)
     IRIX_ROOT := $(TOOLS_DIR)/ido5.3_compiler
@@ -429,8 +436,12 @@ CC_CFLAGS := -fno-builtin
 
 # Check code syntax with host compiler
 ifeq ($(NO_CHECK),0)
-CC_CHECK := $(CC_CHECK_CROSS)gcc
-CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
+  ifneq ($(call find-command,$(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CC_CHECK := $(CC_CHECK_CROSS)gcc$(CC_VERSION_SUFFIX)
+  else
+    CC_CHECK := $(CC_CHECK_CROSS)gcc
+  endif
+  CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
 endif
 
 # C compiler options
@@ -466,8 +477,20 @@ AS := as
 endif
 
 ifneq ($(TARGET_WEB),1)
-  CC := $(PLATFORM_CROSS)gcc
-  CXX := $(PLATFORM_CROSS)g++
+  ifneq ($(call find-command,$(PLATFORM_CROSS)gcc),)
+    CC := $(PLATFORM_CROSS)gcc
+  else ifneq ($(call find-command,$(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CC := $(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)
+  else
+    CC := gcc
+  endif
+  ifneq ($(call find-command,$(PLATFORM_CROSS)g++),)
+    CXX := $(PLATFORM_CROSS)g++
+  else ifneq ($(call find-command,$(PLATFORM_CROSS)gcc$(CC_VERSION_SUFFIX)),)
+    CXX := $(PLATFORM_CROSS)g++$(CC_VERSION_SUFFIX)
+  else
+    CXX := g++
+  endif
 else
   CC := emcc
 endif
@@ -560,6 +583,8 @@ else
 
 ifneq ($(call find-command,$(PLATFORM_CROSS)cpp),)
   CPP      := $(PLATFORM_CROSS)cpp
+else ifneq ($(call find-command,$(PLATFORM_CROSS)cpp$(CC_VERSION_SUFFIX)),)
+  CPP      := $(PLATFORM_CROSS)cpp$(CC_VERSION_SUFFIX)
 else
   CPP      := cpp
 endif
