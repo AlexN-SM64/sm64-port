@@ -472,6 +472,17 @@ typedef struct {
  */
 #define OS_APP_NMI_BUFSIZE    64
 
+/*
+ * Fixes for PC build
+ */
+#ifdef TARGET_N64
+#define FIX_U32_UINTPTR_T u32
+#define FIX_U32_SIZE_T    u32
+#else
+#define FIX_U32_UINTPTR_T uintptr_t
+#define FIX_U32_SIZE_T    size_t
+#endif
+
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /**************************************************************************
@@ -634,9 +645,7 @@ extern void        osSetTLBASID(s32);
 
 /* Address translation routines and macros */
 
-#ifdef TARGET_N64
-extern u32         osVirtualToPhysical(void *);
-#endif //! Fix the build for PC Port
+extern FIX_U32_UINTPTR_T osVirtualToPhysical(void *);
 extern void *         osPhysicalToVirtual(u32);
 
 #define    OS_K0_TO_PHYSICAL(x)    (u32)(((char *)(x)-0x80000000))
@@ -664,13 +673,11 @@ extern u32         osPiGetStatus(void);
 extern s32        osPiGetDeviceType(void);
 extern s32        osPiRawWriteIo(u32, u32);
 extern s32        osPiRawReadIo(u32, u32 *);
-#ifdef TARGET_N64
-extern s32        osPiRawStartDma(s32, u32, void *, u32);
-extern s32        osPiWriteIo(u32, u32);
-extern s32        osPiReadIo(u32, u32 *);
-extern s32        osPiStartDma(OSIoMesg *, s32, s32, u32, void *, u32,
+extern s32        osPiRawStartDma(s32, u32, void *, FIX_U32_SIZE_T);
+extern s32        osPiWriteIo(FIX_U32_UINTPTR_T, u32);
+extern s32        osPiReadIo(FIX_U32_UINTPTR_T, u32 *);
+extern s32        osPiStartDma(OSIoMesg *, s32, s32, FIX_U32_UINTPTR_T, void *, FIX_U32_SIZE_T,
                      OSMesgQueue *);
-#endif //! Fix the build for PC Port
 extern void        osCreatePiManager(OSPri, OSMesgQueue *, OSMesg *, s32);
 
 /* Video interface (Vi) */
@@ -752,9 +759,7 @@ extern OSPiHandle *osDriveRomInit(void);
 extern s32 osEPiDeviceType(OSPiHandle *, OSPiInfo *);
 extern s32 osEPiRawWriteIo(OSPiHandle *, u32 , u32);
 extern s32 osEPiRawReadIo(OSPiHandle *, u32 , u32 *);
-#ifdef TARGET_N64
-extern s32 osEPiRawStartDma(OSPiHandle *, s32 , u32 , void *, u32 );
-#endif //! Fix the build for PC Port
+extern s32 osEPiRawStartDma(OSPiHandle *, s32 , u32 , void *, FIX_U32_SIZE_T );
 extern s32 osEPiWriteIo(OSPiHandle *, u32 , u32 );
 extern s32 osEPiReadIo(OSPiHandle *, u32 , u32 *);
 extern s32 osEPiStartDma(OSPiHandle *, OSIoMesg *, s32);
