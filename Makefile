@@ -275,7 +275,7 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
 
   # Make tools if out of date
   $(info Building tools...)
-  DUMMY != $(MAKE) -s -C $(TOOLS_DIR) $(if $(filter-out ido0,$(COMPILER)$(USE_QEMU_IRIX)),all-except-recomp,) >&2 || echo FAIL
+  DUMMY != $(MAKE) -s -C $(TOOLS_DIR) $(if $(filter-out ido0,$(COMPILER)$(USE_QEMU_IRIX)),all-except-recomp,) -j$(shell nproc) >&2 || echo FAIL
     ifeq ($(DUMMY),FAIL)
       $(error Failed to build tools)
     endif
@@ -483,7 +483,7 @@ ifeq ($(shell getconf LONG_BIT), 32)
 else
 
 # Bypass check if host compiler for that architecture is outside
-CC_CHECK_DUMPMACHINE := $(shell $(CC_CHECK) -dumpmachine)
+CC_CHECK_DUMPMACHINE := $($(CC_CHECK) -dumpmachine)
 ifneq      ($(findstring x86_64,$(CC_CHECK_DUMPMACHINE)),)
   CC_CHECK_BYPASS := 0
 else ifneq ($(findstring i686,$(CC_CHECK_DUMPMACHINE)),)
@@ -672,7 +672,7 @@ clean:
 
 distclean: clean
 	$(PYTHON) extract_assets.py --clean
-	$(MAKE) -C $(TOOLS_DIR) clean
+	$(MAKE) -C $(TOOLS_DIR) clean -j$(shell nproc)
 
 test: $(ROM)
 	$(EMULATOR) $(EMU_FLAGS) $<
