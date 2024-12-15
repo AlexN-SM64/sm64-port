@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: find_existing_cmd.sh [ cross_prefix | find_command ] <architecture> <command> [ no_prefix_dash | no_suffix_dash | no_dashes ]
+# Usage: find_existing_cmd.sh [ cross_prefix | find_command ] <architecture> <command>
 #
 # Examples:
 #
@@ -37,7 +37,6 @@
 TYPE=$1
 ARCH=$2
 CMD=$3
-NO_DASH_TYPE=$4
 
 if [[ $OS == Windows_NT ]]; then
 EXE=.exe
@@ -46,15 +45,8 @@ else
 CMD_EXE=$CMD
 fi
 
-if ! [[ $NO_DASH_TYPE == no_prefix_dash ]] || ! [[ $NO_DASH_TYPE == no_dashes ]]; then
-PREFIX_DASH=-
-fi
-if ! [[ $NO_DASH_TYPE == no_suffix_dash ]] || ! [[ $NO_DASH_TYPE == no_dashes ]]; then
-SUFFIX_DASH=-
-fi
-
-ARCH_DASH=$ARCH$PREFIX_DASH
-DASH_CMD=$SUFFIX_DASH$CMD_EXE
+ARCH_DASH=$ARCH-
+DASH_CMD=-$CMD_EXE
 
 ARCH_STRING_LENGTH=${#ARCH}
 CMD_STRING_LENGTH=${#CMD_EXE}
@@ -74,6 +66,6 @@ else
 echo $TARGET_CMD
 fi
 else
-echo "Usage: $0 [ cross_prefix | find_command ] <architecture> <command> [ no_prefix_dash | no_suffix_dash | no_dashes ]"
+echo "Usage: $0 [ cross_prefix | find_command ] <architecture> <command>"
 exit 1
 fi

@@ -425,8 +425,13 @@ ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command mips l
   CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix mips ld)
 else ifneq ($(call find-command,$(shell bash find_existing_cmd.sh find_command mips64 ld)),)
   CROSS ?= $(shell bash find_existing_cmd.sh cross_prefix mips64 ld)
-else
-  $(error Unable to detect a suitable MIPS toolchain installed)
+endif
+ifeq ($(findstring mips,$(CROSS)),)
+  ifeq ($(CROSS),)
+    $(error Unable to detect a suitable MIPS toolchain installed)
+  else
+    $(error The selected cross $(CROSS) isn't applicable to MIPS toolchain)
+  endif
 endif
 
 AS        := $(CROSS)as
@@ -478,17 +483,12 @@ ifeq ($(shell getconf LONG_BIT), 32)
 else
 
 # Bypass check if host compiler for that architecture is outside
-ifeq      ($(shell arch),x86_64)
+CC_CHECK_DUMPMACHINE := $(shell $(CC_CHECK) -dumpmachine)
+ifneq      ($(findstring x86_64,$(CC_CHECK_DUMPMACHINE)),)
   CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),i686)
+else ifneq ($(findstring i686,$(CC_CHECK_DUMPMACHINE)),)
   CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),powerpc)
-  CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),powerpc64)
-  CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),powerpc64le)
-  CC_CHECK_BYPASS := 0
-else ifeq ($(shell arch),x32)
+else ifneq ($(findstring powerpc,$(CC_CHECK_DUMPMACHINE)),)
   CC_CHECK_BYPASS := 0
 else
   CC_CHECK_BYPASS := 1
