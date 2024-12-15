@@ -1,4 +1,6 @@
-NOTE: This page is currently under development since the repository has new commits.
+NOTE: This readme is currently under development because the forked repo has a lot of changes.
+Please [compare](https://github.com/sm64-port/sm64-port/compare/master...AlexN-SM64:sm64-port:master)
+them and read the old readme from sm64-port.
 
 # Super Mario 64 Port
 
