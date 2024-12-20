@@ -670,10 +670,10 @@ endif
 # Prefer clang as C preprocessor if installed on the system
 ifneq (,$(call find-command,clang))
   CPP      := clang
-  CPPFLAGS := -E -P -x c -Wno-trigraphs $(DEF_INC_CFLAGS)
+  CPPFLAGS := -E -P -x c -Wno-trigraphs -D_LANGUAGE_ASSEMBLY $(DEF_INC_CFLAGS)
 else
   CPP      := cpp
-  CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
+  CPPFLAGS := -P -Wno-trigraphs -D_LANGUAGE_ASSEMBLY $(DEF_INC_CFLAGS)
 endif
 
 #==============================================================================#
