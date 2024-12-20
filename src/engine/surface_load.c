@@ -25,6 +25,13 @@ SpatialPartitionCell gDynamicSurfacePartition[NUM_CELLS][NUM_CELLS];
 /**
  * Pools of data to contain either surface nodes or surfaces.
  */
+#ifdef USE_SYSTEM_MALLOC
+static struct AllocOnlyPool *sStaticSurfaceNodePool;
+static struct AllocOnlyPool *sStaticSurfacePool;
+static struct AllocOnlyPool *sDynamicSurfaceNodePool;
+static struct AllocOnlyPool *sDynamicSurfacePool;
+static u8 sStaticSurfaceLoadComplete;
+#else
 struct SurfaceNode *sSurfaceNodePool;
 struct Surface *sSurfacePool;
 
@@ -32,6 +39,7 @@ struct Surface *sSurfacePool;
  * The size of the surface pool (2300).
  */
 s16 sSurfacePoolSize;
+#endif
 
 u8 unused8038EEA8[0x30];
 
@@ -39,14 +47,22 @@ u8 unused8038EEA8[0x30];
  * Allocate the part of the surface node pool to contain a surface node.
  */
 static struct SurfaceNode *alloc_surface_node(void) {
+#ifdef USE_SYSTEM_MALLOC
+    struct AllocOnlyPool *pool = !sStaticSurfaceLoadComplete ?
+                                 sStaticSurfaceNodePool : sDynamicSurfaceNodePool;
+    struct SurfaceNode *node = alloc_only_pool_alloc(pool, sizeof(struct SurfaceNode));
+#else
     struct SurfaceNode *node = &sSurfaceNodePool[gSurfaceNodesAllocated];
+#endif
     gSurfaceNodesAllocated++;
 
     node->next = NULL;
 
+#ifndef USE_SYSTEM_MALLOC
     if (gSurfaceNodesAllocated >= 7000) {
         CN_DEBUG_PRINTF((" mcMakeBGCheckList OVERFLOW\n"));
     }
+#endif
 
     return node;
 }
@@ -56,13 +72,20 @@ static struct SurfaceNode *alloc_surface_node(void) {
  * initialize the surface.
  */
 static struct Surface *alloc_surface(void) {
-
+#ifdef USE_SYSTEM_MALLOC
+    struct AllocOnlyPool *pool = !sStaticSurfaceLoadComplete ?
+                                 sStaticSurfacePool : sDynamicSurfacePool;
+    struct Surface *surface = alloc_only_pool_alloc(pool, sizeof(struct Surface));
+#else
     struct Surface *surface = &sSurfacePool[gSurfacesAllocated];
+#endif
     gSurfacesAllocated++;
 
+#ifndef USE_SYSTEM_MALLOC
     if (gSurfacesAllocated >= sSurfacePoolSize) {
         CN_DEBUG_PRINTF((" mcMakeBGCheckData OVERFLOW\n"));
     }
+#endif
 
     surface->type = 0;
     surface->force = 0;
@@ -519,9 +542,16 @@ static void load_environmental_regions(TerrainData **data) {
  * Allocate some of the main pool for surfaces (2300 surf) and for surface nodes (7000 nodes).
  */
 void alloc_surface_pools(void) {
+#ifdef USE_SYSTEM_MALLOC
+    sStaticSurfaceNodePool = alloc_only_pool_init();
+    sStaticSurfacePool = alloc_only_pool_init();
+    sDynamicSurfaceNodePool = alloc_only_pool_init();
+    sDynamicSurfacePool = alloc_only_pool_init();
+#else
     sSurfacePoolSize = 2300;
     sSurfaceNodePool = main_pool_alloc(7000 * sizeof(struct SurfaceNode), MEMORY_POOL_LEFT);
     sSurfacePool = main_pool_alloc(sSurfacePoolSize * sizeof(struct Surface), MEMORY_POOL_LEFT);
+#endif
 
     gCCMEnteredSlide = 0;
     reset_red_coins_collected();
@@ -592,6 +622,17 @@ void load_area_terrain(s16 index, TerrainData *data, RoomData *surfaceRooms, s16
     unused8038BE90 = 0;
     gSurfaceNodesAllocated = 0;
     gSurfacesAllocated = 0;
+#ifdef USE_SYSTEM_MALLOC
+    alloc_only_pool_clear(sStaticSurfaceNodePool);
+    alloc_only_pool_clear(sStaticSurfacePool);
+    alloc_only_pool_clear(sDynamicSurfaceNodePool);
+    alloc_only_pool_clear(sDynamicSurfacePool);
+    sStaticSurfaceLoadComplete = FALSE;
+
+    // Originally they forgot to clear this matrix,
+    // results in segfaults if this is not done.
+    clear_dynamic_surfaces();
+#endif
 
     clear_static_surfaces();
 
@@ -635,6 +676,10 @@ void load_area_terrain(s16 index, TerrainData *data, RoomData *surfaceRooms, s16
 
     gNumStaticSurfaceNodes = gSurfaceNodesAllocated;
     gNumStaticSurfaces = gSurfacesAllocated;
+
+#ifdef USE_SYSTEM_MALLOC
+    sStaticSurfaceLoadComplete = TRUE;
+#endif
 }
 
 /**
@@ -642,6 +687,15 @@ void load_area_terrain(s16 index, TerrainData *data, RoomData *surfaceRooms, s16
  */
 void clear_dynamic_surfaces(void) {
     if (!(gTimeStopState & TIME_STOP_ACTIVE)) {
+#ifdef USE_SYSTEM_MALLOC
+        if (gSurfacesAllocated > gNumStaticSurfaces) {
+            alloc_only_pool_clear(sDynamicSurfacePool);
+        }
+        if (gSurfaceNodesAllocated > gNumStaticSurfaceNodes) {
+            alloc_only_pool_clear(sDynamicSurfaceNodePool);
+        }
+#endif
+
         gSurfacesAllocated = gNumStaticSurfaces;
         gSurfaceNodesAllocated = gNumStaticSurfaceNodes;
 

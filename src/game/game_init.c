@@ -25,8 +25,14 @@ struct Controller gControllers[3];
 
 // Gfx handlers
 struct SPTask *gGfxSPTask;
+#ifdef USE_SYSTEM_MALLOC
+struct AllocOnlyPool *gGfxAllocOnlyPool;
+Gfx *gDisplayListHeadInChunk;
+Gfx *gDisplayListEndInChunk;
+#else
 Gfx *gDisplayListHead;
 u8 *gGfxPoolEnd;
+#endif
 struct GfxPool *gGfxPool;
 
 // OS Controllers
@@ -250,11 +256,13 @@ void create_gfx_task_structure(void) {
     gGfxSPTask->msgqueue = &gGfxVblankQueue;
     gGfxSPTask->msg = (OSMesg) 2;
     gGfxSPTask->task.t.type = M_GFXTASK;
+#ifdef TARGET_N64
     gGfxSPTask->task.t.ucode_boot = rspF3DBootStart;
     gGfxSPTask->task.t.ucode_boot_size = ((u8 *) rspF3DBootEnd - (u8 *) rspF3DBootStart);
     gGfxSPTask->task.t.flags = 0;
     gGfxSPTask->task.t.ucode = rspF3DStart;
     gGfxSPTask->task.t.ucode_data = rspF3DDataStart;
+#endif
     gGfxSPTask->task.t.ucode_size = SP_UCODE_SIZE; // (this size is ignored)
     gGfxSPTask->task.t.ucode_data_size = SP_UCODE_DATA_SIZE;
     gGfxSPTask->task.t.dram_stack = (u64 *) gGfxSPTaskStack;
@@ -324,6 +332,7 @@ void draw_reset_bars(void) {
     osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
 }
 
+#ifdef TARGET_N64
 /**
  * Initial settings for the first rendered frame.
  */
@@ -341,6 +350,18 @@ void render_init(void) {
     sRenderingFramebuffer++;
     gGlobalTimer++;
 }
+#endif
+
+#ifdef USE_SYSTEM_MALLOC
+Gfx **alloc_next_dl(void) {
+    u32 size = 1000;
+    Gfx *new_chunk = alloc_only_pool_alloc(gGfxAllocOnlyPool, size * sizeof(Gfx));
+    gSPBranchList(gDisplayListHeadInChunk++, new_chunk);
+    gDisplayListHeadInChunk = new_chunk;
+    gDisplayListEndInChunk = new_chunk + size;
+    return &gDisplayListHeadInChunk;
+}
+#endif
 
 /**
  * Selects the location of the F3D output buffer (gDisplayListHead).
@@ -349,8 +370,14 @@ void select_gfx_pool(void) {
     gGfxPool = &gGfxPools[gGlobalTimer % ARRAY_COUNT(gGfxPools)];
     set_segment_base_addr(1, gGfxPool->buffer);
     gGfxSPTask = &gGfxPool->spTask;
+#ifdef USE_SYSTEM_MALLOC
+    gDisplayListHeadInChunk = gGfxPool->buffer;
+    gDisplayListEndInChunk = gDisplayListHeadInChunk + 1;
+    alloc_only_pool_clear(gGfxAllocOnlyPool);
+#else
     gDisplayListHead = gGfxPool->buffer;
     gGfxPoolEnd = (u8 *) (gGfxPool->buffer + GFX_POOL_SIZE);
+#endif
 }
 
 /**
@@ -637,11 +664,17 @@ void setup_game_memory(void) {
     load_segment_decompress(2, _segment2_mio0SegmentRomStart, _segment2_mio0SegmentRomEnd);
 }
 
+#ifndef TARGET_N64
+static struct LevelCommand *levelCommandAddr;
+#endif
+
 /**
  * Main game loop thread. Runs forever as long as the game continues.
  */
 void thread5_game_loop(UNUSED void *arg) {
-    struct LevelCommand *addr;
+#ifdef TARGET_N64
+    struct LevelCommand *levelCommandAddr;
+#endif
 
     CN_DEBUG_PRINTF(("start gfx thread\n"));
 
@@ -662,18 +695,30 @@ void thread5_game_loop(UNUSED void *arg) {
 
     set_vblank_handler(2, &gGameVblankHandler, &gGameVblankQueue, (OSMesg) 1);
 
-    // Point address to the entry point into the level script data.
-    addr = segmented_to_virtual(level_script_entry);
+    // Point levelCommandAddr to the entry point into the level script data.
+    levelCommandAddr = segmented_to_virtual(level_script_entry);
 
     play_music(SEQ_PLAYER_SFX, SEQUENCE_ARGS(0, SEQ_SOUND_PLAYER), 0);
     set_sound_mode(save_file_get_sound_mode());
+
+#ifdef TARGET_N64
     render_init();
 
     while (TRUE) {
+#else
+    gGlobalTimer++;
+}
+
+void game_loop_one_iteration(void) {
+#endif
         // If the reset timer is active, run the process to reset the game.
         if (gResetTimer != 0) {
             draw_reset_bars();
+#ifdef TARGET_N64
             continue;
+#else
+            return;
+#endif
         }
         profiler_log_thread5_time(THREAD5_START);
 
@@ -689,15 +734,19 @@ void thread5_game_loop(UNUSED void *arg) {
         audio_game_loop_tick();
         select_gfx_pool();
         read_controller_inputs();
-        addr = level_script_execute(addr);
+        levelCommandAddr = level_script_execute(levelCommandAddr);
 
         display_and_vsync();
 
         // when debug info is enabled, print the "BUF %d" information.
         if (gShowDebugText) {
+#ifndef USE_SYSTEM_MALLOC
             // subtract the end of the gfx pool with the display list to obtain the
             // amount of free space remaining.
             print_text_fmt_int(180, 20, "BUF %d", gGfxPoolEnd - (u8 *) gDisplayListHead);
+#endif
         }
+#ifdef TARGET_N64
     }
+#endif
 }

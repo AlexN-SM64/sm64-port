@@ -48,7 +48,7 @@ static void start_rumble(void) {
 
     block_until_rumble_pak_free();
 
-#ifdef VERSION_CN
+#if defined(VERSION_CN) && defined(TARGET_N64)
     if (!__osMotorAccess(&gRumblePakPfs, MOTOR_START)) {
 #else
     if (!osMotorStart(&gRumblePakPfs)) {
@@ -68,7 +68,7 @@ static void stop_rumble(void) {
 
     block_until_rumble_pak_free();
 
-#ifdef VERSION_CN
+#if defined(VERSION_CN) && defined(TARGET_N64)
     if (!__osMotorAccess(&gRumblePakPfs, MOTOR_STOP)) {
 #else
     if (!osMotorStop(&gRumblePakPfs)) {
@@ -241,6 +241,7 @@ void func_sh_8024CA04(void) {
     gCurrRumbleSettings.unk0C = 4;
 }
 
+#ifdef TARGET_N64
 static void thread6_rumble_loop(UNUSED void *a0) {
     OSMesg msg;
 
@@ -272,12 +273,13 @@ static void thread6_rumble_loop(UNUSED void *a0) {
         }
     }
 }
+#endif
 
 void cancel_rumble(void) {
     sRumblePakActive = osMotorInit(&gSIEventMesgQueue, &gRumblePakPfs, gPlayer1Controller->port) == 0;
 
     if (sRumblePakActive) {
-#ifdef VERSION_CN
+#if defined(VERSION_CN) && defined(TARGET_N64)
         __osMotorAccess(&gRumblePakPfs, MOTOR_STOP);
 #else
         osMotorStop(&gRumblePakPfs);
@@ -295,9 +297,11 @@ void cancel_rumble(void) {
 }
 
 void create_thread_6(void) {
+#ifdef TARGET_N64
     osCreateMesgQueue(&gRumbleThreadVIMesgQueue, &gRumbleThreadVIMesgBuf, 1);
     osCreateThread(&gRumblePakThread, 6, thread6_rumble_loop, NULL, gThread6Stack + 0x2000, 30);
     osStartThread(&gRumblePakThread);
+#endif
 }
 
 void rumble_thread_update_vi(void) {

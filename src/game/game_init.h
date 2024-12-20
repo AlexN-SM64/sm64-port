@@ -9,7 +9,11 @@
 #include "types.h"
 #include "memory.h"
 
+#ifdef USE_SYSTEM_MALLOC
+#define GFX_POOL_SIZE 1
+#else
 #define GFX_POOL_SIZE 6400 // Size of how large the master display list (gDisplayListHead) can be
+#endif
 
 struct GfxPool {
     Gfx buffer[GFX_POOL_SIZE];
@@ -36,8 +40,14 @@ extern uintptr_t gPhysicalZBuffer;
 extern void *gMarioAnimsMemAlloc;
 extern void *gDemoInputsMemAlloc;
 extern struct SPTask *gGfxSPTask;
+#ifdef USE_SYSTEM_MALLOC
+extern struct AllocOnlyPool *gGfxAllocOnlyPool;
+extern Gfx *gDisplayListHeadInChunk;
+extern Gfx *gDisplayListEndInChunk;
+#else
 extern Gfx *gDisplayListHead;
 extern u8 *gGfxPoolEnd;
+#endif
 extern struct GfxPool *gGfxPool;
 extern u8 gControllerBits;
 extern s8 gEepromProbe;
@@ -71,5 +81,10 @@ void end_master_display_list(void);
 void render_init(void);
 void select_gfx_pool(void);
 void display_and_vsync(void);
+
+#ifdef USE_SYSTEM_MALLOC
+Gfx **alloc_next_dl(void);
+#define gDisplayListHead (*(gDisplayListEndInChunk - gDisplayListHeadInChunk >= 2 ? &gDisplayListHeadInChunk : alloc_next_dl()))
+#endif
 
 #endif // GAME_INIT_H
