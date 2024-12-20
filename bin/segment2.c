@@ -2284,35 +2284,11 @@ ALIGNED8 static const Texture texture_font_char_us_button_C_right[] = {
 
 #if defined(VERSION_CN)
 ALIGNED8 static const Texture texture_font_char_cn_16800[] = {
-#include "textures/segment2/segment2_cn.16800.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16810[] = {
-#include "textures/segment2/segment2_cn.16810.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16820[] = {
-#include "textures/segment2/segment2_cn.16820.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16830[] = {
-#include "textures/segment2/segment2_cn.16830.ia1.inc.c"
+#include "textures/segment2/mario_face_cn.16800.ia4.inc.c"
 };
 
 ALIGNED8 static const Texture texture_font_char_cn_16840[] = {
-#include "textures/segment2/segment2_cn.16840.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16850[] = {
-#include "textures/segment2/segment2_cn.16850.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16860[] = {
-#include "textures/segment2/segment2_cn.16860.ia1.inc.c"
-};
-
-ALIGNED8 static const Texture texture_font_char_cn_16870[] = {
-#include "textures/segment2/segment2_cn.16870.ia1.inc.c"
+#include "textures/segment2/mario_face_cn.16840.ia4.inc.c"
 };
 
 ALIGNED8 static const Texture texture_font_char_cn_16880[] = {

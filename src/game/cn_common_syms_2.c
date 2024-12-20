@@ -5,7 +5,7 @@
 
 // This file is used to place iQue COMMON/.scommon symbols in the right locations.
 
-#ifdef VERSION_CN
+#if defined(VERSION_CN) && defined(TARGET_N64)
 // Can't include the .h files directly because they have extern declarations
 struct HudDisplay {
     /*0x00*/ s16 lives;

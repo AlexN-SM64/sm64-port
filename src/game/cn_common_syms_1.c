@@ -4,7 +4,7 @@
 
 // This file is used to place iQue COMMON/.scommon symbols in the right locations.
 
-#ifdef VERSION_CN
+#if defined(VERSION_CN) && defined(TARGET_N64)
 FORCE_BSS u32 __osBaseCounter;
 FORCE_BSS s16 gSaveOptSelectIndex;
 FORCE_BSS s32 sNumCountOverflows;
