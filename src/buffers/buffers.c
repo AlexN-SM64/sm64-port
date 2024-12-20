@@ -21,7 +21,7 @@ ALIGNED16 u8 gAudioHeap[DOUBLE_SIZE_ON_64_BIT(0x31200)];
 // 0x200 bytes
 ALIGNED8 struct SaveBuffer gSaveBuffer;
 // 0x190a0 bytes
-struct GfxPool gGfxPools[2];
+struct GfxPool gGfxPools[GFX_NUM_POOLS];
 ALIGNED8 u8 gThread4Stack[STACKSIZE];
 #if ENABLE_RUMBLE
 ALIGNED8 u8 gThread6Stack[STACKSIZE];
