@@ -58,7 +58,6 @@ static void keyboard_init(void) {
     set_keyboard_mapping(i++, L_CBUTTONS,   configKeyCLeft);
     set_keyboard_mapping(i++, D_CBUTTONS,   configKeyCDown);
     set_keyboard_mapping(i++, R_CBUTTONS,   configKeyCRight);
-    set_keyboard_mapping(i++, L_TRIG,       configKeyL);
     set_keyboard_mapping(i++, R_TRIG,       configKeyR);
     set_keyboard_mapping(i++, START_BUTTON, configKeyStart);
 
