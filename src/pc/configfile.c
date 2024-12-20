@@ -52,7 +52,7 @@ static const struct ConfigOption options[] = {
     {.name = "key_a",          .type = CONFIG_TYPE_UINT, .uintValue = &configKeyA},
     {.name = "key_b",          .type = CONFIG_TYPE_UINT, .uintValue = &configKeyB},
     {.name = "key_start",      .type = CONFIG_TYPE_UINT, .uintValue = &configKeyStart},
-    {.name = "key_l",          .type = CONFIG_TYPE_UINT, .uintValue = &configKeyL),
+    {.name = "key_l",          .type = CONFIG_TYPE_UINT, .unitValue = &configKeyL),
     {.name = "key_r",          .type = CONFIG_TYPE_UINT, .uintValue = &configKeyR},
     {.name = "key_z",          .type = CONFIG_TYPE_UINT, .uintValue = &configKeyZ},
     {.name = "key_cup",        .type = CONFIG_TYPE_UINT, .uintValue = &configKeyCUp},
