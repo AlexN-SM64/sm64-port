@@ -1,4 +1,4 @@
-#if defined (__linux__) && !defined(TARGET_SDL2)
+#ifdef __linux__
 
 #include <stdbool.h>
 #include <pthread.h>

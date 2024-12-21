@@ -1,6 +1,6 @@
 #include "../compat.h"
 
-#if (defined(__linux__) || defined(__BSD__)) && !defined(TARGET_SDL2)
+#if defined(__linux__) || defined(__BSD__)
 
 #include <stdio.h>
 #include <stdbool.h>

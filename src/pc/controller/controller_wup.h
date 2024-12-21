@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_WUP_H
 #define CONTROLLER_WUP_H
 
-#if defined (__linux__) && !defined(TARGET_SDL2)
+#ifdef __linux__
 
 #include "controller_api.h"
 
