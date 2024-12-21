@@ -42,6 +42,8 @@ This patch provides an in-game FPS counter to measure the frame rate.
 
 This enhancement allows the same ROM to work on both the Nintendo 64 and the iQue Player.
 
+Please note: this enhancement has been removed in this repo starting refresh 16. Go to [base repo](https://github.com/AlexN-SM64/sm64-port/tree/master/enhancements) instead, clone it and apply this.
+
 ## Memory Expansion Pak Error Screen - `mem_error_screen.patch`
 
 Use this patch if your game requires over 4 MB of memory and requires the
