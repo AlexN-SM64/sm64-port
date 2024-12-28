@@ -234,6 +234,15 @@ endif
 # Whether to colorize build messages
 COLOR ?= 1
 
+# Whether to fix the texture format (e.g. only burn smoke texture format fix)
+TEXTURE_FORMAT_FIX ?= 0
+$(eval $(call validate-option,TEXTURE_FORMAT_FIX,0 1))
+
+ifeq ($(TEXTURE_FORMAT_FIX),1)
+  DEFINES += TEXTURE_FORMAT_FIX=1
+  COMPARE := 0
+endif
+
 # display selected options unless 'make clean' or 'make distclean' is run
 ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info ==== Build Options ====)

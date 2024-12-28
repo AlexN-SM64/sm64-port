@@ -47,6 +47,12 @@ ALIGNED8 static const Texture chuckya_seg8_texture_08006778[] = {
 #include "actors/chuckya/chuckya_eyes.rgba16.inc.c"
 };
 
+// An unused Chuckya's "hair" texture was added to code. It was allowed to fix the IDO non-matching build.
+// 0x08006F78
+ALIGNED8 static const Texture chuckya_seg8_texture_08006F78[] = {
+#include "actors/chuckya/chuckya_hair_unused.rgba16.inc.c"
+};
+
 // 0x08007778
 ALIGNED8 static const Texture chuckya_seg8_texture_08007778[] = {
 #include "actors/chuckya/chuckya_hand_antenna.rgba16.inc.c"
