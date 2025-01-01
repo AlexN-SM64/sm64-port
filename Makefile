@@ -116,7 +116,7 @@ endif
 #   sh - builds the 1997 Japanese Shindou version, with rumble pak support
 #   cn - builds the 2003 Chinese iQue version
 VERSION ?= cn
-# NOTE (for Chinese gamers): In this branch we recommend to build the PC Port of Chinese iQue version of SM64
+# NOTE (for Chinese gamers): In this repo we recommend to build the PC Port of Chinese iQue version of SM64
 $(eval $(call validate-option,VERSION,jp us eu sh cn))
 
 ifeq      ($(VERSION),jp)
