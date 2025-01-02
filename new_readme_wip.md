@@ -66,19 +66,19 @@ To install Cygwin, at first, you'll need to start the installer for supported an
 
 At second, you'll need to install the next dependencies:
 
-* gcc-g++ (latest) (for building tools)
-* git (latest)
-* make (latest)
-* mingw64-i686-gcc-g++ (latest) (for 32-bit Windows)
-* mingw64-x86_64-gcc-g++ (latest) (for 64-bit Windows)
-* python3 (latest)
+* gcc-g++ (12.4.0-3) (for building tools)
+* git (2.45.1-1)
+* make (4.4.1-2)
+* mingw64-i686-gcc-g++ (12.4.0-1) (for 32-bit Windows)
+* mingw64-x86_64-gcc-g++ (12.4.0-1) (for 64-bit Windows)
+* python3 (3.9.16-1)
 
 If you want to build the game with OpenGL backend, please install required additional dependencies:
 
-* mingw64-i686-glew (latest) (for 32-bit Windows)
-* mingw64-i686-SDL2 (latest) (for 32-bit Windows)
-* mingw64-x86_64-glew (latest) (for 64-bit Windows)
-* mingw64-x86_64-SDL2 (latest) (for 64-bit Windows)
+* mingw64-i686-glew (2.1.0-1) (for 32-bit Windows)
+* mingw64-i686-SDL2 (2.0.7-1) (for 32-bit Windows)
+* mingw64-x86_64-glew (2.1.0-1) (for 64-bit Windows)
+* mingw64-x86_64-SDL2 (2.0.7-1) (for 64-bit Windows)
 
 Note: If MinGW GCC for both architectures are installed on Cygwin, after cloning the repo, build with `make ARCHITECTURE=<ARCH>`, where `<ARCH>` can be `i686` or `x86_64`.
 
