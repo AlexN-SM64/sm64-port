@@ -1,6 +1,6 @@
 # Super Mario 64 Port
 
-My own updated fork of https://github.com/am64-port/sm64-port
+My own updated fork of https://github.com/sm64-port/sm64-port
 
 - This repo contains a full decompilation of Super Mario 64 (J), (U), (E), and (SH).
 - Naming and documentation of the source code and data structures are in progress.
