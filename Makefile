@@ -51,8 +51,6 @@ ifeq ($(TARGET_N64),0)
       ifneq ($(ENABLE_DX12),1)
         ENABLE_DX11 ?= 1
       endif
-    else
-      $(warning After building for Windows with OpenGL backend, the game may causes maximum FPS.)
     endif
   else
     # On others, default to OpenGL
