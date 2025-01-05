@@ -59,3 +59,9 @@ In the Scripts window, double click on "RecordDemo" on the list on the left side
 When this is done, it should turn green which lets you know that it has started.
 
 When your demo has been recorded, it will be dumped to the newly created `/SM64_DEMOS/` folder within the Project64 directory.
+
+## Texture Format Fix - `texture_format_fix.patch`
+
+Made by: AlexN-SM64
+
+This patch fixes texture format (e.g. fixes only the burn smoke texture format: RGBA16 --> IA16)
