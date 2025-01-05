@@ -13,6 +13,8 @@ Likewise, to undo the changes from a patch you applied, run
 To create your own enhancement patch, switch to the `master` Git
 branch, make your changes to the code (but do not commit), then run `tools/create_patch.sh`. Your changes will be stored in the .patch file you specify. 
 
+To build the N64 ROM after applying patches, make sure `COMPARE` is set to `0`. Example: `make TARGET_N64=1 COMPARE=0`.
+
 The following enhancements are included in this directory:
 
 ## 60 FPS - `60fps.patch`
