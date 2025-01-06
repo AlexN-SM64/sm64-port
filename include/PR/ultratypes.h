@@ -1,8 +1,6 @@
 #ifndef _ULTRA64_TYPES_H_
 #define _ULTRA64_TYPES_H_
 
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
 #ifndef NULL
 #define NULL    (void *)0
 #endif
@@ -44,7 +42,5 @@ typedef volatile s8   vs8;
 typedef volatile s16 vs16;
 typedef volatile s32 vs32;
 typedef volatile s64 vs64;
-
-#endif
 
 #endif
