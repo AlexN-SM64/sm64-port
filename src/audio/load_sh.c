@@ -1,4 +1,4 @@
-#if defined(VERSION_SH) || defined(VERSION_CN)
+#ifdef VERSION_SH
 #include <ultra64.h>
 #include <PR/os.h>
 
@@ -254,7 +254,8 @@ void init_sample_dma_buffers(UNUSED s32 arg0) {
     sSampleDmas = sound_alloc_uninitialized(&gNotesAndBuffersPool,
             gMaxSimultaneousNotes * 4 * sizeof(struct SharedDma) * gAudioBufferParameters.presetUnk4);
 
-    for (i = 0; i < gMaxSimultaneousNotes * 3 * gAudioBufferParameters.presetUnk4; i++) {
+    for (i = 0; i < gMaxSimultaneousNotes * 3 * gAudioBufferParameters.presetUnk4; i++)
+    {
         if ((sSampleDmas[gSampleDmaNumListItems].buffer = sound_alloc_uninitialized(&gNotesAndBuffersPool, sDmaBufSize)) == NULL) {
             break;
         }
@@ -621,7 +622,8 @@ void *func_sh_802f3764(s32 poolIdx, s32 idx, s32 *arg2) {
         devAddr = f->seqArray[idx].offset;
 
 
-        switch (sp18) {
+        switch (sp18)
+        {
             case 0:
                 vAddr = unk_pool1_alloc(poolIdx, idx, size);
                 if (vAddr == NULL) {
@@ -983,6 +985,7 @@ void func_sh_802f41e4(s32 audioResetStatus) {
     func_sh_802f4dcc(audioResetStatus);
 }
 
+#if defined(VERSION_SH)
 u8 gShindouSoundBanksHeader[] = {
 #include "sound/ctl_header.inc.c"
 };
@@ -998,6 +1001,7 @@ u8 gShindouSampleBanksHeader[] = {
 u8 gShindouSequencesHeader[] = {
 #include "sound/sequences_header.inc.c"
 };
+#endif
 
 // (void) must be omitted from parameters
 void audio_init() {
@@ -1029,8 +1033,7 @@ void audio_init() {
     port_eu_init();
 
 #ifdef TARGET_N64
-    eu_stubbed_printf_3(
-        "Clear Workarea %x -%x size %x \n",
+    eu_stubbed_printf_3("Clear Workarea %x -%x size %x \n",
         (uintptr_t) &gAudioGlobalsStartMarker,
         (uintptr_t) &gAudioGlobalsEndMarker,
         (uintptr_t) &gAudioGlobalsEndMarker - (uintptr_t) &gAudioGlobalsStartMarker
@@ -1541,7 +1544,7 @@ s32 func_sh_802f573c(s32 audioResetStatus) {
 
     if (D_SH_8034F68C > 0) {
         if (audioResetStatus != 0) {
-            if (osRecvMesg(&gUnkQueue2, (OSMesg *) &idx, OS_MESG_NOBLOCK)) {
+            if (osRecvMesg(&gUnkQueue2, (OSMesg *) &idx, OS_MESG_NOBLOCK)){
             }
             D_SH_8034F68C = 0;
             return 0;
