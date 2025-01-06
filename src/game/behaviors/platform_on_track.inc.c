@@ -8,7 +8,7 @@
 /**
  * Collision models for the different types of platforms.
  */
-static void const *sPlatformOnTrackCollisionModels[] = {
+static Collision const *sPlatformOnTrackCollisionModels[] = {
     /* PLATFORM_ON_TRACK_TYPE_CARPET    */ rr_seg7_collision_07029038,
     /* PLATFORM_ON_TRACK_TYPE_SKI_LIFT  */ ccm_seg7_collision_070163F8,
     /* PLATFORM_ON_TRACK_TYPE_CHECKERED */ checkerboard_platform_seg8_collision_0800D710,
@@ -18,10 +18,16 @@ static void const *sPlatformOnTrackCollisionModels[] = {
 /**
  * Paths for the different instances of these platforms.
  */
-static void const *sPlatformOnTrackPaths[] = {
-    rr_seg7_trajectory_0702EC3C,    rr_seg7_trajectory_0702ECC0,  ccm_seg7_trajectory_0701669C,
-    bitfs_seg7_trajectory_070159AC, hmc_seg7_trajectory_0702B86C, lll_seg7_trajectory_0702856C,
-    lll_seg7_trajectory_07028660,   rr_seg7_trajectory_0702ED9C,  rr_seg7_trajectory_0702EEE0,
+static Trajectory const *sPlatformOnTrackPaths[] = {
+    rr_seg7_trajectory_0702EC3C,
+    rr_seg7_trajectory_0702ECC0,
+    ccm_seg7_trajectory_0701669C,
+    bitfs_seg7_trajectory_070159AC,
+    hmc_seg7_trajectory_0702B86C,
+    lll_seg7_trajectory_0702856C,
+    lll_seg7_trajectory_07028660,
+    rr_seg7_trajectory_0702ED9C,
+    rr_seg7_trajectory_0702EEE0,
 };
 
 /**
@@ -38,7 +44,7 @@ static void platform_on_track_reset(void) {
  * begin blinking, and finally reset.
  */
 static void platform_on_track_mario_not_on_platform(void) {
-    if (!((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_DISAPPEAR)) {
+    if (!((u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_DISAPPEAR)) {
         // Once oTimer reaches 150, blink 40 times
         if (cur_obj_wait_then_blink(150, 40)) {
             platform_on_track_reset();
@@ -52,8 +58,8 @@ static void platform_on_track_mario_not_on_platform(void) {
  */
 void bhv_platform_on_track_init(void) {
     if (!(o->activeFlags & ACTIVE_FLAG_IN_DIFFERENT_ROOM)) {
-        s16 pathIndex = (u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_PATH;
-        o->oPlatformOnTrackType = ((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_TYPE) >> 4;
+        s16 pathIndex = (u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_PATH;
+        o->oPlatformOnTrackType = ((u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_MASK_TYPE) >> 4;
 
         o->oPlatformOnTrackIsNotSkiLift = o->oPlatformOnTrackType - PLATFORM_ON_TRACK_TYPE_SKI_LIFT;
 
@@ -64,7 +70,7 @@ void bhv_platform_on_track_init(void) {
 
         o->oPlatformOnTrackIsNotHMC = pathIndex - 4;
 
-        o->oBehParams2ndByte = o->oMoveAngleYaw; // TODO: Weird?
+        o->oBhvParams2ndByte = o->oMoveAngleYaw; // TODO: Weird?
 
         if (o->oPlatformOnTrackType == PLATFORM_ON_TRACK_TYPE_CHECKERED) {
             o->header.gfx.scale[1] = 2.0f;
@@ -87,7 +93,7 @@ static void platform_on_track_act_init(void) {
     o->oPosY = o->oHomeY = o->oPlatformOnTrackStartWaypoint->pos[1];
     o->oPosZ = o->oHomeZ = o->oPlatformOnTrackStartWaypoint->pos[2];
 
-    o->oFaceAngleYaw = o->oBehParams2ndByte;
+    o->oFaceAngleYaw = o->oBhvParams2ndByte;
     o->oForwardVel = o->oVelX = o->oVelY = o->oVelZ = o->oPlatformOnTrackDistMovedSinceLastBall = 0.0f;
 
     o->oPlatformOnTrackWasStoodOn = FALSE;
@@ -136,7 +142,7 @@ static void platform_on_track_act_move_along_track(void) {
 
     // Fall after reaching the last waypoint if desired
     if (o->oPlatformOnTrackPrevWaypointFlags == WAYPOINT_FLAGS_END
-        && !((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_RETURN_TO_START)) {
+        && !((u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_RETURN_TO_START)) {
         o->oAction = PLATFORM_ON_TRACK_ACT_FALL;
     } else {
         // The ski lift should pause or stop after reaching a special waypoint
@@ -183,7 +189,7 @@ static void platform_on_track_act_move_along_track(void) {
         //  after reappearing
 
         // Turn face yaw and compute yaw vel
-        if (!((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_TURN_YAW)) {
+        if (!((u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_TURN_YAW)) {
             s16 targetFaceYaw = o->oMoveAngleYaw + 0x4000;
             s16 yawSpeed = abs_angle_diff(targetFaceYaw, o->oFaceAngleYaw) / 20;
 
@@ -194,7 +200,7 @@ static void platform_on_track_act_move_along_track(void) {
         }
 
         // Turn face roll and compute roll vel
-        if (((u16)(o->oBehParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_TURN_ROLL)) {
+        if (((u16)(o->oBhvParams >> 16) & PLATFORM_ON_TRACK_BP_DONT_TURN_ROLL)) {
             s16 rollSpeed = abs_angle_diff(o->oMoveAnglePitch, o->oFaceAngleRoll) / 20;
 
             initialAngle = o->oFaceAngleRoll;
@@ -304,7 +310,7 @@ void bhv_platform_on_track_update(void) {
 void bhv_track_ball_update(void) {
     // Despawn after the elevator passes this ball
     s16 relativeIndex =
-        (s16) o->oBehParams2ndByte - (s16) o->parentObj->oPlatformOnTrackBaseBallIndex - 1;
+        (s16) o->oBhvParams2ndByte - (s16) o->parentObj->oPlatformOnTrackBaseBallIndex - 1;
     if (relativeIndex < 1 || relativeIndex > 5) {
         obj_mark_for_deletion(o);
     }
