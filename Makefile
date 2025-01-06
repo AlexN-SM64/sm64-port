@@ -240,6 +240,7 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info Target:         $(TARGET))
   ifeq ($(TARGET_N64),1)
   $(info Platform:       N64)
+  $(info Compiler:       $(COMPILER))
   ifeq ($(COMPARE),1)
     $(info Compare ROM:    yes)
   else
