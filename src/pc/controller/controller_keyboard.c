@@ -3,10 +3,6 @@
 
 #include "controller_api.h"
 
-#ifdef TARGET_WEB
-#include "controller_emscripten_keyboard.h"
-#endif
-
 #include "../configfile.h"
 
 static int keyboard_buttons_down;
@@ -60,10 +56,6 @@ static void keyboard_init(void) {
     set_keyboard_mapping(i++, R_CBUTTONS,   configKeyCRight);
     set_keyboard_mapping(i++, R_TRIG,       configKeyR);
     set_keyboard_mapping(i++, START_BUTTON, configKeyStart);
-
-#ifdef TARGET_WEB
-    controller_emscripten_keyboard_init();
-#endif
 }
 
 static void keyboard_read(OSContPad *pad) {

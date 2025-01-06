@@ -1,10 +1,5 @@
 #include <stdlib.h>
 
-#ifdef TARGET_WEB
-#include <emscripten.h>
-#include <emscripten/html5.h>
-#endif
-
 #include "sm64.h"
 
 #include "game/memory.h"
@@ -99,39 +94,6 @@ void produce_one_frame(void) {
     gfx_end_frame();
 }
 
-#ifdef TARGET_WEB
-static void em_main_loop(void) {
-}
-
-static void request_anim_frame(void (*func)(double time)) {
-    EM_ASM(requestAnimationFrame(function(time) {
-        dynCall("vd", $0, [time]);
-    }), func);
-}
-
-static void on_anim_frame(double time) {
-    static double target_time;
-
-    time *= 0.03; // milliseconds to frame count (33.333 ms -> 1)
-
-    if (time >= target_time + 10.0) {
-        // We are lagging 10 frames behind, probably due to coming back after inactivity,
-        // so reset, with a small margin to avoid potential jitter later.
-        target_time = time - 0.010;
-    }
-
-    for (int i = 0; i < 2; i++) {
-        // If refresh rate is 15 Hz or something we might need to generate two frames
-        if (time >= target_time) {
-            produce_one_frame();
-            target_time = target_time + 1.0;
-        }
-    }
-
-    request_anim_frame(on_anim_frame);
-}
-#endif
-
 static void save_config(void) {
     configfile_save(CONFIG_FILE);
 }
@@ -152,11 +114,6 @@ void main_func(void) {
 
     configfile_load(CONFIG_FILE);
     atexit(save_config);
-
-#ifdef TARGET_WEB
-    emscripten_set_main_loop(em_main_loop, 0, 0);
-    request_anim_frame(on_anim_frame);
-#endif
 
 #if defined(ENABLE_DX12)
     rendering_api = &gfx_direct3d12_api;
@@ -196,11 +153,6 @@ void main_func(void) {
         audio_api = &audio_alsa;
     }
 #endif
-#ifdef TARGET_WEB
-    if (audio_api == NULL && audio_sdl.init()) {
-        audio_api = &audio_sdl;
-    }
-#endif
     if (audio_api == NULL) {
         audio_api = &audio_null;
     }
@@ -209,17 +161,10 @@ void main_func(void) {
     sound_init();
 
     thread5_game_loop(NULL);
-#ifdef TARGET_WEB
-    /*for (int i = 0; i < atoi(argv[1]); i++) {
-        game_loop_one_iteration();
-    }*/
-    inited = 1;
-#else
     inited = 1;
     while (1) {
         wm_api->main_loop(produce_one_frame);
     }
-#endif
 }
 
 #if defined(_WIN32) || defined(_WIN64)

@@ -17,8 +17,6 @@ DEFINES :=
 
 # Build for the N64 (turn this off for ports)
 TARGET_N64 ?= 0
-# Build for Emscripten/WebGL
-TARGET_WEB ?= 0
 # Compiler to use (ido or gcc)
 
 
@@ -36,14 +34,12 @@ ifeq ($(TARGET_N64),0)
   NON_MATCHING := 1
   GRUCODE := f3dex2e
   TARGET_WINDOWS := 0
-  ifeq ($(TARGET_WEB),0)
     ifeq ($(OS),Windows_NT)
       TARGET_WINDOWS := 1
     else
       # TODO: Detect Mac OS X, BSD, etc. For now, assume Linux
       TARGET_LINUX := 1
     endif
-  endif
 
   ifeq ($(TARGET_WINDOWS),1)
     # On Windows, default to DirectX 11
@@ -205,9 +201,6 @@ endif
 # OPT_FLAGS - for ports
 ifeq ($(TARGET_N64),0)
   OPT_FLAGS := -O2
-  ifeq ($(TARGET_WEB),1)
-    OPT_FLAGS += -g4 --source-map-base http://localhost:8080/
-  endif
 endif
 
 
@@ -246,21 +239,48 @@ COLOR ?= 1
 
 # display selected options unless 'make clean' or 'make distclean' is run
 ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
-  $(info ==== Build Options ====)
+  $(info ====== Build Options ======)
   $(info Version:        $(VERSION))
   $(info Microcode:      $(GRUCODE))
   $(info Target:         $(TARGET))
+  
+  ifeq ($(TARGET_N64),1)
+  $(info Platform:       Nintendo 64)
+  
+  $(info Compiler:       $(COMPILER))
+  
   ifeq ($(COMPARE),1)
     $(info Compare ROM:    yes)
   else
     $(info Compare ROM:    no)
   endif
+  
   ifeq ($(NON_MATCHING),1)
     $(info Build Matching: no)
   else
     $(info Build Matching: yes)
   endif
-  $(info =======================)
+  
+  else ifeq ($(TARGET_WINDOWS),1)
+  $(info Platform:       Windows)
+  $(info Architecture:   $(ARCHITECTURE))
+  else ifeq ($(TARGET_LINUX),1)
+  $(info Platform:       Linux)
+  else
+  $(info Platform:       Unknown)
+  endif
+  
+  ifeq ($(ENABLE_DX11),1)
+  $(info GFX Backend:    DirectX 11)
+  endif
+  ifeq ($(ENABLE_DX12),1)
+  $(info GFX Backend:    DirectX 12)
+  endif
+  ifeq ($(ENABLE_OPENGL),1)
+  $(info GFX Backend:    OpenGL)
+  endif
+  
+  $(info ===========================)
 endif
 
 DEFINES += _FINALROM=1
@@ -317,15 +337,11 @@ BUILD_DIR_BASE := build
 # BUILD_DIR is the location where all build artifacts are placed
 ifeq ($(TARGET_N64),1)
   BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)
-else ifeq ($(TARGET_WEB),1)
-  BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)_web
 else
   BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)_pc
 endif
 
-ifeq ($(TARGET_WEB),1)
-  EXE := $(BUILD_DIR)/$(TARGET).html
-else ifeq ($(TARGET_WINDOWS),1)
+ifeq ($(TARGET_WINDOWS),1)
   EXE := $(BUILD_DIR)/$(TARGET).exe
 else
   EXE := $(BUILD_DIR)/$(TARGET)
@@ -586,13 +602,8 @@ else
 AS := as
 endif
 
-ifneq ($(TARGET_WEB),1)
   CC := $(CROSS)gcc
   CXX := $(CROSS)g++
-else
-  CC := emcc
-  CXX := em++
-endif
 ifeq ($(CXX_FILES),"")
   LD := $(CC)
 else
@@ -622,10 +633,6 @@ ifeq ($(TARGET_LINUX),1)
   PLATFORM_CFLAGS  := -DTARGET_LINUX `pkg-config --cflags libusb-1.0`
   PLATFORM_LDFLAGS := -lm -lpthread `pkg-config --libs libusb-1.0` -lasound -lpulse -no-pie
 endif
-ifeq ($(TARGET_WEB),1)
-  PLATFORM_CFLAGS  := -DTARGET_WEB
-  PLATFORM_LDFLAGS := -lm -no-pie -s TOTAL_MEMORY=20MB -g4 --source-map-base http://localhost:8080/ -s "EXTRA_EXPORTED_RUNTIME_METHODS=['callMain']"
-endif
 
 PLATFORM_CFLAGS += -DNO_SEGMENTED_MEMORY -DUSE_SYSTEM_MALLOC
 
@@ -640,10 +647,6 @@ ifeq ($(ENABLE_OPENGL),1)
   ifeq ($(TARGET_LINUX),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags)
     GFX_LDFLAGS += -lGL $(shell sdl2-config --libs) -lX11 -lXrandr
-  endif
-  ifeq ($(TARGET_WEB),1)
-    GFX_CFLAGS  += -s USE_SDL=2
-    GFX_LDFLAGS += -lGL -lSDL2
   endif
 endif
 ifeq ($(ENABLE_DX11),1)
@@ -740,15 +743,24 @@ all: $(EXE)
 endif
 
 clean:
-	$(RM) -r $(BUILD_DIR_BASE)
+	@$(PRINT) "$(RED)Removing build directory... $(NO_COL)\n"
+	$(V)$(RM) -r $(BUILD_DIR_BASE)
 
 distclean: clean
-	$(PYTHON) extract_assets.py --clean
-	$(MAKE) -C $(TOOLS_DIR) clean -j$(shell nproc)
-	$(MAKE) -C $(TOOLS_DIR)/sm64tools clean -j$(shell nproc)
+	@$(PRINT) "$(RED)Removing extracted assets... $(NO_COL)\n"
+	$(V)$(PYTHON) extract_assets.py --clean
+	@$(PRINT) "$(RED)Removing built general tools... $(NO_COL)\n"
+	$(V)$(MAKE) -C $(TOOLS_DIR) clean -j$(shell nproc)
+	@$(PRINT) "$(RED)Removing built sm64tools... $(NO_COL)\n"
+	$(V)$(MAKE) -C $(TOOLS_DIR)/sm64tools clean -j$(shell nproc)
 
+ifeq ($(TARGET_N64),1)
 test: $(ROM)
 	$(EMULATOR) $(EMU_FLAGS) $<
+else
+test: $(EXE)
+	$<
+endif
 
 load: $(ROM)
 	$(LOADER) $(LOADER_FLAGS) $<
