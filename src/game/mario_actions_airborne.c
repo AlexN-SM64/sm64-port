@@ -331,7 +331,7 @@ void update_flying_pitch(struct MarioState *m) {
 }
 
 void update_flying(struct MarioState *m) {
-    UNUSED u32 unused;
+    UNUSED u8 filler[4];
 
     update_flying_pitch(m);
     update_flying_yaw(m);
@@ -1271,8 +1271,8 @@ s32 act_getting_blown(struct MarioState *m) {
             m->forwardVel += 0.8f;
         }
 
-        if (m->vel[1] < 0.0f && m->unkC4 < 4.0f) {
-            m->unkC4 += 0.05f;
+        if (m->vel[1] < 0.0f && m->gettingBlownGravity < 4.0f) {
+            m->gettingBlownGravity += 0.05f;
         }
     }
 
@@ -1541,7 +1541,7 @@ s32 act_lava_boost(struct MarioState *m) {
                 if (m->actionState < 2 && m->vel[1] < 0.0f) {
                     m->vel[1] = -m->vel[1] * 0.4f;
                     mario_set_forward_vel(m, m->forwardVel * 0.5f);
-                    m->actionState += 1;
+                    m->actionState++;
                 } else {
                     set_mario_action(m, ACT_LAVA_BOOST_LAND, 0);
                 }

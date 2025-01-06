@@ -27,6 +27,13 @@
 #define HUD_LUT_DIFF HUD_LUT_GLOBAL
 #endif
 
+// They didn't change it everywhere in iQue
+#ifdef VERSION_CN
+#define HUD_LUT_DIFF2 HUD_LUT_JPMENU
+#else
+#define HUD_LUT_DIFF2 HUD_LUT_DIFF
+#endif
+
 enum MenuMode {
     MENU_MODE_NONE = -1,
     MENU_MODE_UNUSED_0,
@@ -38,17 +45,16 @@ enum MenuMode {
 extern s8 gDialogCourseActNum;
 extern s8 gHudFlash;
 
-struct DialogEntry
-{
- /*0x00*/ u32 unused;
- /*0x04*/ s8 linesPerBox;
- /*0x06*/ s16 leftOffset;
- /*0x08*/ s16 width;
- /*0x0C*/ const u8 *str;
+struct DialogEntry {
+    /*0x00*/ u32 unused;
+    /*0x04*/ s8 linesPerBox;
+    /*0x06*/ s16 leftOffset;
+    /*0x08*/ s16 width;
+    /*0x0C*/ const u8 *str;
 };
 
 // EU only
-enum HudSpecialHUDChars {
+enum HudSpecialCharsEU {
     HUD_CHAR_A_UMLAUT = 0x3A,
     HUD_CHAR_O_UMLAUT = 0x3B,
     HUD_CHAR_U_UMLAUT = 0x3C
@@ -56,7 +62,16 @@ enum HudSpecialHUDChars {
 
 enum SpecialFontChars {
     GLOBAL_CHAR_SPACE = 0x9E,
-    GLOBAR_CHAR_TERMINATOR = 0xFF
+#ifdef VERSION_CN
+    GLOBAL_CHAR_NEWLINE = 0xFE,
+#endif
+    GLOBAL_CHAR_TERMINATOR = 0xFF
+};
+
+enum DialogMark {
+    DIALOG_MARK_NONE,
+    DIALOG_MARK_DAKUTEN,
+    DIALOG_MARK_HANDAKUTEN
 };
 
 // definitions for some of the special characters defined in charmap.txt
@@ -91,7 +106,7 @@ enum DialogSpecialChars {
     DIALOG_CHAR_I_NO_DIA = 0xEB,           // 'i' without diacritic
     DIALOG_CHAR_DOUBLE_LOW_QUOTE = 0xF0,   // German opening quotation mark
 #endif
-#if defined(VERSION_US) || defined(VERSION_EU)
+#if defined(VERSION_US) || defined(VERSION_EU) || defined(VERSION_CN)
     DIALOG_CHAR_SLASH = 0xD0,
     DIALOG_CHAR_MULTI_THE = 0xD1, // 'the'
     DIALOG_CHAR_MULTI_YOU = 0xD2, // 'you'
@@ -101,13 +116,21 @@ enum DialogSpecialChars {
     DIALOG_CHAR_SPACE = 0x9E,
     DIALOG_CHAR_STAR_COUNT = 0xE0, // number of stars
     DIALOG_CHAR_UMLAUT = 0xE9,
-    DIALOG_CHAR_DAKUTEN = 0xF0,
-    DIALOG_CHAR_PERIOD_OR_HANDAKUTEN = 0xF1,
+    DIALOG_CHAR_MARK_START = 0xEF,
+    DIALOG_CHAR_DAKUTEN = DIALOG_CHAR_MARK_START + DIALOG_MARK_DAKUTEN,
+    DIALOG_CHAR_PERIOD_OR_HANDAKUTEN = DIALOG_CHAR_MARK_START + DIALOG_MARK_HANDAKUTEN,
     DIALOG_CHAR_STAR_FILLED = 0xFA,
     DIALOG_CHAR_STAR_OPEN = 0xFD,
     DIALOG_CHAR_NEWLINE = 0xFE,
     DIALOG_CHAR_TERMINATOR = 0xFF
 };
+
+#ifdef VERSION_CN
+#define DIALOG_CHAR_SPECIAL_MODIFIER 0xFF
+#define SPECIAL_CHAR(x) (DIALOG_CHAR_SPECIAL_MODIFIER << 8 | (x))
+#else
+#define SPECIAL_CHAR(x) (x)
+#endif
 
 // gDialogResponse
 enum DialogResponseDefines {
@@ -118,10 +141,10 @@ enum DialogResponseDefines {
 };
 
 extern s32 gDialogResponse;
-extern u16 gDialogColorFadeTimer;
+extern u16 gMenuTextColorTransTimer;
 extern s8 gLastDialogLineNum;
 extern s32 gDialogVariable;
-extern u16 gDialogTextAlpha;
+extern u16 gMenuTextAlpha;
 extern s16 gCutsceneMsgXOffset;
 extern s16 gCutsceneMsgYOffset;
 extern s8 gRedCoinsCollected;
@@ -129,11 +152,13 @@ extern s8 gRedCoinsCollected;
 void create_dl_identity_matrix(void);
 void create_dl_translation_matrix(s8 pushOp, f32 x, f32 y, f32 z);
 void create_dl_ortho_matrix(void);
+
 void print_generic_string(s16 x, s16 y, const u8 *str);
 void print_hud_lut_string(s8 hudLUT, s16 x, s16 y, const u8 *str);
 void print_menu_generic_string(s16 x, s16 y, const u8 *str);
+
 void handle_menu_scrolling(s8 scrollDirection, s8 *currentIndex, s8 minIndex, s8 maxIndex);
-#if defined(VERSION_US) || defined(VERSION_EU)
+#if defined(VERSION_US) || defined(VERSION_EU) || defined(VERSION_CN)
 s16 get_str_x_pos_from_center(s16 centerPos, u8 *str, f32 scale);
 #endif
 #if defined(VERSION_JP) || defined(VERSION_SH)
@@ -142,8 +167,20 @@ s16 get_str_x_pos_from_center(s16 centerPos, u8 *str, f32 scale);
 #if defined(VERSION_JP) || defined(VERSION_EU) || defined(VERSION_SH)
 s16 get_str_x_pos_from_center_scale(s16 centerPos, u8 *str, f32 scale);
 #endif
-void print_hud_my_score_coins(s32 useCourseCoinScore, s8 fileNum, s8 courseNum, s16 x, s16 y);
+void print_hud_my_score_coins(s32 useCourseCoinScore, s8 fileIndex, s8 courseIndex, s16 x, s16 y);
+
 void int_to_str(s32 num, u8 *dst);
+
+#ifdef VERSION_CN
+void int_to_str_2(s32 num, u8 *dst);
+#endif
+
+#ifdef VERSION_CN
+#define INT_TO_STR_DIFF int_to_str_2
+#else
+#define INT_TO_STR_DIFF int_to_str
+#endif
+
 s16 get_dialog_id(void);
 void create_dialog_box(s16 dialog);
 void create_dialog_box_with_var(s16 dialog, s32 dialogVar);

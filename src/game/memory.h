@@ -12,8 +12,7 @@
 #ifdef USE_SYSTEM_MALLOC
 struct AllocOnlyPool;
 #else
-struct AllocOnlyPool
-{
+struct AllocOnlyPool {
     s32 totalSpace;
     s32 usedSpace;
     u8 *startPtr;
@@ -23,21 +22,18 @@ struct AllocOnlyPool
 
 struct MemoryPool;
 
-struct OffsetSizePair
-{
+struct OffsetSizePair {
     u32 offset;
     u32 size;
 };
 
-struct DmaTable
-{
+struct DmaTable {
     u32 count;
     u8 *srcAddr;
     struct OffsetSizePair anim[1]; // dynamic size
 };
 
-struct DmaHandlerList
-{
+struct DmaHandlerList {
     struct DmaTable *dmaTable;
     void *currentAddr;
     void *bufTarget;
@@ -95,7 +91,7 @@ struct AllocOnlyPool *alloc_only_pool_resize(struct AllocOnlyPool *pool, u32 siz
 
 struct MemoryPool *mem_pool_init(u32 size, u32 side);
 void *mem_pool_alloc(struct MemoryPool *pool, u32 size);
-void mem_pool_free(struct MemoryPool *pool, void *addr);
+BAD_RETURN(s32) mem_pool_free(struct MemoryPool *pool, void *addr);
 
 void *alloc_display_list(u32 size);
 void setup_dma_table_list(struct DmaHandlerList *list, void *srcAddr, void *buffer);

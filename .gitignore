@@ -75,3 +75,8 @@ sm64config.txt
 
 # Backup files
 *.bak
+
+# Other files needed in tools
+!/tools/**/*.o
+!/tools/**/*.so
+!/tools/**/*.so.*
