@@ -269,6 +269,7 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
   # Make sure assets exist
   NOEXTRACT ?= 0
   ifeq ($(NOEXTRACT),0)
+    $(info Extracting assets...)
     DUMMY != $(PYTHON) extract_assets.py $(VERSION) >&2 || echo FAIL
     ifeq ($(DUMMY),FAIL)
       $(error Failed to extract assets)
@@ -281,7 +282,11 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
     ifeq ($(DUMMY),FAIL)
       $(error Failed to build tools)
     endif
-  $(info Building ROM...)
+  ifeq ($(TARGET_N64),1)
+    $(info Building ROM...)
+  else
+    $(info Building game...)
+  endif
 
 endif
 
@@ -1016,7 +1021,8 @@ $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 
 else
 $(EXE): $(O_FILES) $(MIO0_FILES:.mio0=.o) $(ULTRA_O_FILES) $(GODDARD_O_FILES)
-	$(LD) -L $(BUILD_DIR) -o $@ $(O_FILES) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(LDFLAGS)
+	@$(PRINT) "$(GREEN)Building game:  $(BLUE)$@ $(NO_COL)\n"
+	$(V)$(LD) -L $(BUILD_DIR) -o $@ $(O_FILES) $(ULTRA_O_FILES) $(GODDARD_O_FILES) $(LDFLAGS)
 endif
 
 
