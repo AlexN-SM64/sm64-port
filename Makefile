@@ -671,14 +671,22 @@ all: $(EXE)
 endif
 
 clean:
-	$(RM) -r $(BUILD_DIR_BASE)
+	@$(PRINT) "$(RED)Removing build directory... $(NO_COL)\n"
+	$(V)$(RM) -r $(BUILD_DIR_BASE)
 
 distclean: clean
-	$(PYTHON) extract_assets.py --clean
-	$(MAKE) -C $(TOOLS_DIR) clean -j$(shell nproc)
+	@$(PRINT) "$(RED)Removing extracted assets... $(NO_COL)\n"
+	$(V)$(PYTHON) extract_assets.py --clean
+	@$(PRINT) "$(RED)Removing built tools... $(NO_COL)\n"
+	$(V)$(MAKE) -C $(TOOLS_DIR) clean -j$(shell nproc)
 
+ifeq ($(TARGET_N64),1)
 test: $(ROM)
 	$(EMULATOR) $(EMU_FLAGS) $<
+else
+test: $(EXE)
+	$<
+endif
 
 load: $(ROM)
 	$(LOADER) $(LOADER_FLAGS) $<
