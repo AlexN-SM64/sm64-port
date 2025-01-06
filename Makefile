@@ -234,23 +234,28 @@ COLOR ?= 1
 
 # display selected options unless 'make clean' or 'make distclean' is run
 ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
-  $(info ==== Build Options ====)
+  $(info ====== Build Options ======)
   $(info Version:        $(VERSION))
   $(info Microcode:      $(GRUCODE))
   $(info Target:         $(TARGET))
+  
   ifeq ($(TARGET_N64),1)
-  $(info Platform:       N64)
+  $(info Platform:       Nintendo 64)
+  
   $(info Compiler:       $(COMPILER))
+  
   ifeq ($(COMPARE),1)
     $(info Compare ROM:    yes)
   else
     $(info Compare ROM:    no)
   endif
+  
   ifeq ($(NON_MATCHING),1)
     $(info Build Matching: no)
   else
     $(info Build Matching: yes)
   endif
+  
   else ifeq ($(TARGET_WEB),1)
   $(info Platform:       Web)
   else ifeq ($(TARGET_WINDOWS),1)
@@ -261,7 +266,18 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   else
   $(info Platform:       Unknown)
   endif
-  $(info =======================)
+  
+  ifeq ($(ENABLE_DX11),1)
+  $(info GFX Backend:    DirectX 11)
+  endif
+  ifeq ($(ENABLE_DX12),1)
+  $(info GFX Backend:    DirectX 12)
+  endif
+  ifeq ($(ENABLE_OPENGL),1)
+  $(info GFX Backend:    OpenGL)
+  endif
+  
+  $(info ===========================)
 endif
 
 
