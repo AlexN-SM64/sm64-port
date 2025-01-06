@@ -17,8 +17,6 @@ DEFINES :=
 
 # Build for the N64 (turn this off for ports)
 TARGET_N64 ?= 0
-# Build for Emscripten/WebGL
-TARGET_WEB ?= 0
 # Compiler to use (ido or gcc)
 
 
@@ -36,14 +34,12 @@ ifeq ($(TARGET_N64),0)
   NON_MATCHING := 1
   GRUCODE := f3dex2e
   TARGET_WINDOWS := 0
-  ifeq ($(TARGET_WEB),0)
     ifeq ($(OS),Windows_NT)
       TARGET_WINDOWS := 1
     else
       # TODO: Detect Mac OS X, BSD, etc. For now, assume Linux
       TARGET_LINUX := 1
     endif
-  endif
 
   ifeq ($(TARGET_WINDOWS),1)
     # On Windows, default to DirectX 11
@@ -193,9 +189,6 @@ endif
 # OPT_FLAGS - for ports
 ifeq ($(TARGET_N64),0)
   OPT_FLAGS := -O2
-  ifeq ($(TARGET_WEB),1)
-    OPT_FLAGS += -g3 -gsource-map
-  endif
 endif
 
 
@@ -256,8 +249,6 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
     $(info Build Matching: yes)
   endif
   
-  else ifeq ($(TARGET_WEB),1)
-  $(info Platform:       Web)
   else ifeq ($(TARGET_WINDOWS),1)
   $(info Platform:       Windows)
   $(info Architecture:   $(ARCHITECTURE))
@@ -328,15 +319,11 @@ BUILD_DIR_BASE := build
 # BUILD_DIR is the location where all build artifacts are placed
 ifeq ($(TARGET_N64),1)
   BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)
-else ifeq ($(TARGET_WEB),1)
-  BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)_web
 else
   BUILD_DIR := $(BUILD_DIR_BASE)/$(VERSION)_pc
 endif
 
-ifeq ($(TARGET_WEB),1)
-  EXE := $(BUILD_DIR)/$(TARGET).html
-else ifeq ($(TARGET_WINDOWS),1)
+ifeq ($(TARGET_WINDOWS),1)
   EXE := $(BUILD_DIR)/$(TARGET).exe
 else
   EXE := $(BUILD_DIR)/$(TARGET)
@@ -549,13 +536,8 @@ else
 AS := as
 endif
 
-ifneq ($(TARGET_WEB),1)
   CC := $(CROSS)gcc
   CXX := $(CROSS)g++
-else
-  CC := emcc
-  CXX := em++
-endif
 ifeq ($(CXX_FILES),"")
   LD := $(CC)
 else
@@ -585,10 +567,6 @@ ifeq ($(TARGET_LINUX),1)
   PLATFORM_CFLAGS  := -DTARGET_LINUX `pkg-config --cflags libusb-1.0`
   PLATFORM_LDFLAGS := -lm -lpthread `pkg-config --libs libusb-1.0` -lasound -lpulse -no-pie
 endif
-ifeq ($(TARGET_WEB),1)
-  PLATFORM_CFLAGS  := -DTARGET_WEB
-  PLATFORM_LDFLAGS := -lm -no-pie -s TOTAL_MEMORY=32MB -g3 -gsource-map -s "EXPORTED_RUNTIME_METHODS=['callMain']"
-endif
 
 PLATFORM_CFLAGS += -DNO_SEGMENTED_MEMORY -DUSE_SYSTEM_MALLOC
 
@@ -604,10 +582,6 @@ ifeq ($(ENABLE_OPENGL),1)
     GFX_CFLAGS  += $(shell sdl2-config --cflags)
     GFX_LDFLAGS += -lGL $(shell sdl2-config --libs) -lX11 -lXrandr
   endif
-  ifeq ($(TARGET_WEB),1)
-    GFX_CFLAGS  += -s USE_SDL=2
-    GFX_LDFLAGS += -lGL -lSDL2
-  endif
 endif
 ifeq ($(ENABLE_DX11),1)
   GFX_CFLAGS := -DENABLE_DX11
@@ -621,11 +595,7 @@ endif
 GFX_CFLAGS += -DWIDESCREEN
 
 CC_CHECK := $(CC) -fsyntax-only -fsigned-char -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS)
-CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv
-
-ifeq ($(TARGET_WEB),0)
-CFLAGS += -march=native
-endif
+CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv -march=native
 
 ASFLAGS := -I include -I $(BUILD_DIR) $(foreach d,$(DEFINES),--defsym $(d))
 
