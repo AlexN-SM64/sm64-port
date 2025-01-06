@@ -194,7 +194,7 @@ endif
 ifeq ($(TARGET_N64),0)
   OPT_FLAGS := -O2
   ifeq ($(TARGET_WEB),1)
-    OPT_FLAGS += -g4 --source-map-base http://localhost:8080/
+    OPT_FLAGS += -g3 -gsource-map
   endif
 endif
 
@@ -587,7 +587,7 @@ ifeq ($(TARGET_LINUX),1)
 endif
 ifeq ($(TARGET_WEB),1)
   PLATFORM_CFLAGS  := -DTARGET_WEB
-  PLATFORM_LDFLAGS := -lm -no-pie -s TOTAL_MEMORY=20MB -g4 --source-map-base http://localhost:8080/ -s "EXTRA_EXPORTED_RUNTIME_METHODS=['callMain']"
+  PLATFORM_LDFLAGS := -lm -no-pie -s TOTAL_MEMORY=32MB -g3 -gsource-map -s "EXPORTED_RUNTIME_METHODS=['callMain']"
 endif
 
 PLATFORM_CFLAGS += -DNO_SEGMENTED_MEMORY -DUSE_SYSTEM_MALLOC
@@ -621,7 +621,11 @@ endif
 GFX_CFLAGS += -DWIDESCREEN
 
 CC_CHECK := $(CC) -fsyntax-only -fsigned-char -Wall -Wextra -Wno-format-security -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS)
-CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv -march=native
+CFLAGS := $(OPT_FLAGS) -D_LANGUAGE_C $(DEF_INC_CFLAGS) $(PLATFORM_CFLAGS) $(GFX_CFLAGS) -fno-strict-aliasing -fwrapv
+
+ifeq ($(TARGET_WEB),0)
+CFLAGS += -march=native
+endif
 
 ASFLAGS := -I include -I $(BUILD_DIR) $(foreach d,$(DEFINES),--defsym $(d))
 
