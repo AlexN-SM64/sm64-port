@@ -175,11 +175,7 @@ static struct ShaderProgram *gfx_opengl_create_and_load_new_shader(uint32_t shad
     size_t num_floats = 4;
 
     // Vertex shader
-    #ifdef TARGET_WEB
-    append_line(vs_buf, &vs_len, "#version 100");
-    #else
     append_line(vs_buf, &vs_len, "#version 110");
-    #endif
     append_line(vs_buf, &vs_len, "attribute vec4 aVtxPos;");
     if (cc_features.used_textures[0] || cc_features.used_textures[1]) {
         append_line(vs_buf, &vs_len, "attribute vec2 aTexCoord;");
@@ -210,12 +206,8 @@ static struct ShaderProgram *gfx_opengl_create_and_load_new_shader(uint32_t shad
     append_line(vs_buf, &vs_len, "}");
 
     // Fragment shader
-    #ifdef TARGET_WEB
-    append_line(fs_buf, &fs_len, "#version 100");
-    append_line(fs_buf, &fs_len, "precision mediump float;");
-    #else
     append_line(fs_buf, &fs_len, "#version 110");
-    #endif
+    //append_line(fs_buf, &fs_len, "precision mediump float;");
     if (cc_features.used_textures[0] || cc_features.used_textures[1]) {
         append_line(fs_buf, &fs_len, "varying vec2 vTexCoord;");
     }
