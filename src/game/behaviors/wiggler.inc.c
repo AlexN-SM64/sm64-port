@@ -66,7 +66,7 @@ void bhv_wiggler_body_part_update(void) {
     f32 dy;
     f32 dz;
     f32 dxz;
-    struct ChainSegment *segment = &o->parentObj->oWigglerSegments[o->oBehParams2ndByte];
+    struct ChainSegment *segment = &o->parentObj->oWigglerSegments[o->oBhvParams2ndByte];
     f32 posOffset;
 
     cur_obj_scale(o->parentObj->header.gfx.scale[0]);
@@ -91,8 +91,7 @@ void bhv_wiggler_body_part_update(void) {
         //  the floor
         o->oPosY += -30.0f;
         cur_obj_update_floor_height();
-        if (o->oFloorHeight > o->oPosY) // TODO: Check ineq swap
-        {
+        if (o->oFloorHeight > o->oPosY) {
             o->oPosY = o->oFloorHeight;
         }
     }
@@ -117,10 +116,8 @@ void bhv_wiggler_body_part_update(void) {
  */
 void wiggler_init_segments(void) {
     s32 i;
-    struct ChainSegment *segments;
-    struct Object *bodyPart;
+    struct ChainSegment *segments = mem_pool_alloc(gObjectMemoryPool, 4 * sizeof(struct ChainSegment));
 
-    segments = mem_pool_alloc(gObjectMemoryPool, 4 * sizeof(struct ChainSegment));
     if (segments != NULL) {
         // Each segment represents the global position and orientation of each
         // object. Segment 0 represents the wiggler's head, and segment i>0
@@ -141,7 +138,7 @@ void wiggler_init_segments(void) {
 
         // Spawn each body part
         for (i = 1; i <= 3; i++) {
-            bodyPart =
+            struct Object *bodyPart =
                 spawn_object_relative(i, 0, 0, 0, o, MODEL_WIGGLER_BODY, bhvWigglerBody);
             if (bodyPart != NULL) {
                 obj_init_animation_with_sound(bodyPart, wiggler_seg5_anims_0500C874, 0);
@@ -175,9 +172,7 @@ void wiggler_init_segments(void) {
     s16 dyaw;
     f32 dxz;
     s32 i;
-    f32 segmentLength;
-
-    segmentLength = 35.0f * o->header.gfx.scale[0];
+    f32 segmentLength = 35.0f * o->header.gfx.scale[0];
 
     for (i = 1; i <= 3; i++) {
         prevBodyPart = &o->oWigglerSegments[i - 1];
@@ -240,7 +235,7 @@ static void wiggler_act_walk(void) {
         obj_forward_vel_approach(sWigglerSpeeds[o->oHealth - 1], 1.0f);
 
         if (o->oWigglerWalkAwayFromWallTimer != 0) {
-            o->oWigglerWalkAwayFromWallTimer -= 1;
+            o->oWigglerWalkAwayFromWallTimer--;
         } else {
             if (o->oDistanceToMario >= 25000.0f) {
                 // If >1200 away from home, turn to home
@@ -256,7 +251,7 @@ static void wiggler_act_walk(void) {
                 if (o->oHealth < 4) {
                     o->oWigglerTargetYaw = o->oAngleToMario;
                 } else if (o->oWigglerTimeUntilRandomTurn != 0) {
-                    o->oWigglerTimeUntilRandomTurn -= 1;
+                    o->oWigglerTimeUntilRandomTurn--;
                 } else {
                     o->oWigglerTargetYaw = o->oMoveAngleYaw + 0x4000 * (s16) random_sign();
                     o->oWigglerTimeUntilRandomTurn = random_linear_offset(30, 50);
@@ -305,7 +300,7 @@ static void wiggler_act_jumped_on(void) {
     // defeated) or go back to walking
     if (o->header.gfx.scale[1] >= 4.0f) {
         if (o->oTimer > 30) {
-            if (cur_obj_update_dialog_with_cutscene(MARIO_DIALOG_LOOK_UP, 
+            if (cur_obj_update_dialog_with_cutscene(MARIO_DIALOG_LOOK_UP,
                 DIALOG_FLAG_NONE, CUTSCENE_DIALOG, attackText[o->oHealth - 2])) {
                 // Because we don't want the wiggler to disappear after being
                 // defeated, we leave its health at 1
