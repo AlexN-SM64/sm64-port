@@ -238,6 +238,8 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info Version:        $(VERSION))
   $(info Microcode:      $(GRUCODE))
   $(info Target:         $(TARGET))
+  ifeq ($(TARGET_N64),1)
+  $(info Platform:       N64)
   ifeq ($(COMPARE),1)
     $(info Compare ROM:    yes)
   else
@@ -247,6 +249,16 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
     $(info Build Matching: no)
   else
     $(info Build Matching: yes)
+  endif
+  else ifeq ($(TARGET_WEB),1)
+  $(info Platform:       Web)
+  else ifeq ($(TARGET_WINDOWS),1)
+  $(info Platform:       Windows)
+  $(info Architecture:   $(ARCHITECTURE))
+  else ifeq ($(TARGET_LINUX),1)
+  $(info Platform:       Linux)
+  else
+  $(info Platform:       Unknown)
   endif
   $(info =======================)
 endif
