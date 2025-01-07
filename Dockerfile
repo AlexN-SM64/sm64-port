@@ -1,6 +1,6 @@
 FROM ubuntu:latest as build
 
-RUN apt update && apt upgrade -y && apt install -y bsdextrautils build-essential gcc-mips-linux-gnu libcapstone-dev libsdl2-dev libusb-1.0-0-dev
+RUN apt update && apt upgrade -y && apt install -y bsdextrautils build-essential gcc-mips-linux-gnu libsdl2-dev libusb-1.0-0-dev
 
 RUN mkdir /sm64
 WORKDIR /sm64

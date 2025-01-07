@@ -8,10 +8,10 @@ To apply a patch, run `tools/apply_patch.sh [patch]` where `[patch]` is the name
 to the source code.
 
 Likewise, to undo the changes from a patch you applied, run
-`tools/revert_patch.sh` with the name of the .patch file you wish to undo. 
+`tools/revert_patch.sh` with the name of the .patch file you wish to undo.
 
 To create your own enhancement patch, switch to the `master` Git
-branch, make your changes to the code (but do not commit), then run `tools/create_patch.sh`. Your changes will be stored in the .patch file you specify. 
+branch, make your changes to the code (but do not commit), then run `tools/create_patch.sh`. Your changes will be stored in the .patch file you specify.
 
 To build the N64 ROM after applying patches, make sure `COMPARE` is set to `0`. Example: `make TARGET_N64=1 COMPARE=0`.
 
@@ -43,6 +43,8 @@ This patch provides an in-game FPS counter to measure the frame rate.
 ## iQue Player Support - `ique_support.patch`
 
 This enhancement allows the same ROM to work on both the Nintendo 64 and the iQue Player.
+
+Please note: this enhancement has been removed in this repo starting refresh 16. Go to [base repo](https://github.com/AlexN-SM64/sm64-port/tree/master/enhancements) instead, clone it and apply this.
 
 ## Memory Expansion Pak Error Screen - `mem_error_screen.patch`
 

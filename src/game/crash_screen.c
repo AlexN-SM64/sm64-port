@@ -4,7 +4,7 @@
 
 #include "sm64.h"
 
-#if defined(TARGET_N64) && (defined(VERSION_EU) || defined(VERSION_SH))
+#if defined(TARGET_N64) && (defined(VERSION_EU) || defined(VERSION_SH) || defined(VERSION_CN))
 
 #include "lib/src/printf.h"
 
@@ -17,6 +17,7 @@ u8 gCrashScreenCharToGlyph[128] = {
     23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,
 };
 
+// A height of seven pixels for each Character * nine rows of characters + one row unused.
 u32 gCrashScreenFont[7 * 9 + 1] = {
     #include "textures/crash_screen/crash_screen_font.ia1.inc.c"
 };
@@ -117,7 +118,7 @@ void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
     if (size > 0) {
         ptr = buf;
 
-#ifdef VERSION_SH
+#if defined(VERSION_SH) || defined(VERSION_CN)
         while (size > 0) {
 #else
         while (*ptr) {
@@ -129,7 +130,7 @@ void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
                 crash_screen_draw_glyph(x, y, glyph);
             }
 
-#ifdef VERSION_SH
+#if defined(VERSION_SH) || defined(VERSION_CN)
             size--;
 #endif
 
@@ -181,16 +182,14 @@ void draw_crash_screen(OSThread *thread) {
     __OSThreadContext *tc = &thread->context;
 
     cause = (tc->cause >> 2) & 0x1f;
-    if (cause == 23) // EXC_WATCH
-    {
+    if (cause == 23) { // EXC_WATCH
         cause = 16;
     }
-    if (cause == 31) // EXC_VCED
-    {
+    if (cause == 31) { // EXC_VCED
         cause = 17;
     }
 
-#ifdef VERSION_SH
+#if defined(VERSION_SH) || defined(VERSION_CN)
     osWritebackDCacheAll();
 #endif
 
@@ -300,14 +299,15 @@ void crash_screen_init(void) {
     gCrashScreen.height = 0x10;
 #endif
     osCreateMesgQueue(&gCrashScreen.mesgQueue, &gCrashScreen.mesg, 1);
-    osCreateThread(&gCrashScreen.thread, 2, thread2_crash_screen, NULL,
-                   (u8 *) gCrashScreen.stack + sizeof(gCrashScreen.stack),
+    osCreateThread(
+        &gCrashScreen.thread, 2, thread2_crash_screen, NULL,
+        (u8 *) gCrashScreen.stack + sizeof(gCrashScreen.stack),
 #ifdef VERSION_EU
-                   OS_PRIORITY_APPMAX
+        OS_PRIORITY_APPMAX
 #else
-                   OS_PRIORITY_RMON
+        OS_PRIORITY_RMON
 #endif
-                  );
+    );
     osStartThread(&gCrashScreen.thread);
 }
 
