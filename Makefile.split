@@ -245,6 +245,36 @@ $(BUILD_DIR)/bin/eu/translation_de.elf:  SEGMENT_ADDRESS := 0x19000000
 $(BUILD_DIR)/bin/eu/translation_en.elf:  SEGMENT_ADDRESS := 0x19000000
 $(BUILD_DIR)/bin/eu/translation_fr.elf:  SEGMENT_ADDRESS := 0x19000000
 
+# Linked leveldata with texture data
+$(BUILD_DIR)/levels/bbh/leveldata.elf:              $(BUILD_DIR)/bin/spooky.elf
+$(BUILD_DIR)/levels/bitdw/leveldata.elf:            $(BUILD_DIR)/bin/sky.elf
+$(BUILD_DIR)/levels/bitfs/leveldata.elf:            $(BUILD_DIR)/bin/sky.elf
+$(BUILD_DIR)/levels/bits/leveldata.elf:             $(BUILD_DIR)/bin/sky.elf
+$(BUILD_DIR)/levels/bob/leveldata.elf:              $(BUILD_DIR)/bin/generic.elf
+$(BUILD_DIR)/levels/bowser_2/leveldata.elf:         $(BUILD_DIR)/bin/fire.elf
+$(BUILD_DIR)/levels/castle_courtyard/leveldata.elf: $(BUILD_DIR)/bin/outside.elf
+$(BUILD_DIR)/levels/castle_grounds/leveldata.elf:   $(BUILD_DIR)/bin/outside.elf
+$(BUILD_DIR)/levels/castle_inside/leveldata.elf:    $(BUILD_DIR)/bin/inside.elf
+$(BUILD_DIR)/levels/ccm/leveldata.elf:              $(BUILD_DIR)/bin/snow.elf
+$(BUILD_DIR)/levels/cotmc/leveldata.elf:            $(BUILD_DIR)/bin/cave.elf
+$(BUILD_DIR)/levels/ddd/leveldata.elf:              $(BUILD_DIR)/bin/water.elf
+$(BUILD_DIR)/levels/hmc/leveldata.elf:              $(BUILD_DIR)/bin/cave.elf
+$(BUILD_DIR)/levels/jrb/leveldata.elf:              $(BUILD_DIR)/bin/water.elf
+$(BUILD_DIR)/levels/lll/leveldata.elf:              $(BUILD_DIR)/bin/fire.elf
+$(BUILD_DIR)/levels/pss/leveldata.elf:              $(BUILD_DIR)/bin/mountain.elf
+$(BUILD_DIR)/levels/rr/leveldata.elf:               $(BUILD_DIR)/bin/sky.elf
+$(BUILD_DIR)/levels/sa/leveldata.elf:               $(BUILD_DIR)/bin/inside.elf
+$(BUILD_DIR)/levels/sl/leveldata.elf:               $(BUILD_DIR)/bin/snow.elf
+$(BUILD_DIR)/levels/ssl/leveldata.elf:              $(BUILD_DIR)/bin/generic.elf
+$(BUILD_DIR)/levels/thi/leveldata.elf:              $(BUILD_DIR)/bin/grass.elf
+$(BUILD_DIR)/levels/totwc/leveldata.elf:            $(BUILD_DIR)/bin/sky.elf
+$(BUILD_DIR)/levels/ttc/leveldata.elf:              $(BUILD_DIR)/bin/machine.elf
+$(BUILD_DIR)/levels/ttm/leveldata.elf:              $(BUILD_DIR)/bin/mountain.elf
+$(BUILD_DIR)/levels/vcutm/leveldata.elf:            $(BUILD_DIR)/bin/outside.elf
+$(BUILD_DIR)/levels/wdw/leveldata.elf:              $(BUILD_DIR)/bin/grass.elf
+$(BUILD_DIR)/levels/wf/leveldata.elf:               $(BUILD_DIR)/bin/grass.elf
+$(BUILD_DIR)/levels/wmotr/leveldata.elf:            $(BUILD_DIR)/bin/sky.elf
+
 # --------------------------------------
 # Skybox Rules
 # --------------------------------------
