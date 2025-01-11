@@ -1,0 +1,5 @@
+gmp
+libelf
+libmpc
+mpfr
+zstd
