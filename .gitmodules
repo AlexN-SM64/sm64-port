@@ -1,0 +1,18 @@
+[submodule "install_pkgs/archlinux/repos/mips64-elf-binutils"]
+	path = install_pkgs/archlinux/repos/mips64-elf-binutils
+	url = https://aur.archlinux.org/mips64-elf-binutils.git
+[submodule "install_pkgs/archlinux/repos/mips64-elf-gcc"]
+	path = install_pkgs/archlinux/repos/mips64-elf-gcc
+	url = https://aur.archlinux.org/mips64-elf-gcc.git
+[submodule "install_pkgs/archlinux/repos/mips64-elf-gcc-stage1"]
+	path = install_pkgs/archlinux/repos/mips64-elf-gcc-stage1
+	url = https://aur.archlinux.org/mips64-elf-gcc-stage1.git
+[submodule "install_pkgs/archlinux/repos/mips64-elf-newlib"]
+	path = install_pkgs/archlinux/repos/mips64-elf-newlib
+	url = https://aur.archlinux.org/mips64-elf-newlib.git
+[submodule "install_pkgs/archlinux/repos/qemu-irix-git"]
+	path = install_pkgs/archlinux/repos/qemu-irix-git
+	url = https://aur.archlinux.org/qemu-irix-git.git
+[submodule "install_pkgs/repos/qemu-irix"]
+	path = install_pkgs/repos/qemu-irix
+	url = https://github.com/AlexN-SM64/qemu-irix
